@@ -1,0 +1,14 @@
+{
+  "name": "lawquiz-server",
+  "version": "1.0.0",
+  "description": "LAW QUIZ 서버형 문제은행 애플리케이션",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "sqlite3": "^5.1.7"
+  }
+}
