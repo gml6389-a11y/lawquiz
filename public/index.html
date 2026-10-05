@@ -89,18 +89,37 @@ const SUBJECTS={
   "민사법":["민법","민사소송법","가족법","상법"]
 };
 
-let bank=[];
-let stats={};
-let settings={lastSubject:null,lastIndex:{},lastId:{}};
-let bookmarks=[];
-let notes={};
-let masterMeta={version:5,bookTitle:"LAW QUIZ 통합 문제은행",processing:{lastSourcePage:null,hasIncompleteQuestion:false,incompleteQuestionId:null},warnings:[]};
+// 최초 접속 시 DB가 비어있어도 화면이 즉시 렌더링되도록 기본 샘플 문제 1개 내장
+const SAMPLE = [
+  {
+    id: "sample-1",
+    number: "1",
+    group: "공법",
+    subject: "헌법",
+    categoryPath: ["헌법총론", "기본원리"],
+    category: "헌법총론 > 기본원리",
+    type: "ox",
+    text: "대한민국의 주권은 국민에게 있고, 모든 권력은 국민으로부터 나온다.",
+    choices: [],
+    answer: "O",
+    explanation: "대한민국 헌법 제1조 제2항 규정입니다.",
+    incomplete: false,
+    sourcePages: ""
+  }
+];
 
-let S={
-  screen:"home",files:[],pendingQuestions:[],pendingMetaList:[],queue:[],qi:0,selected:[],submitted:false,
-  retryPrompt:false,retrying:false,subject:null,group:null,
-  search:"",editingId:null,editDraft:null,
-  setupGroup:null,setupSubject:null,setupMode:"resume",
+let bank = [...SAMPLE];
+let stats = {};
+let settings = {lastSubject:null, lastIndex:{}, lastId:{}};
+let bookmarks = [];
+let notes = {};
+let masterMeta = {version:5, bookTitle:"LAW QUIZ 통합 문제은행", processing:{lastSourcePage:null,hasIncompleteQuestion:false,incompleteQuestionId:null}, warnings:[]};
+
+let S = {
+  screen:"home", files:[], pendingQuestions:[], pendingMetaList:[], queue:[], qi:0, selected:[], submitted:false,
+  retryPrompt:false, retrying:false, subject:null, group:null,
+  search:"", editingId:null, editDraft:null,
+  setupGroup:null, setupSubject:null, setupMode:"resume",
   setupPath:[],
   setupLimit:20,
   setupOrder:"sequential",
@@ -120,21 +139,24 @@ let S={
   addDraft:null,
   addErrors:{}
 };
-let dirty=false;
+let dirty = false;
 
 // 서버에서 초기 데이터 로드
 async function fetchBootstrap(){
   try {
     const res = await fetch('/api/bootstrap');
+    if (!res.ok) throw new Error("서버 응답 오류: " + res.status);
     const data = await res.json();
-    bank = data.bank || [];
+    if (Array.isArray(data.bank) && data.bank.length > 0) {
+      bank = data.bank;
+    }
     stats = data.stats || {};
     bookmarks = data.bookmarks || [];
     notes = data.notes || {};
     settings = data.settings || {lastSubject:null,lastIndex:{},lastId:{}};
-    render();
   } catch(e) {
-    console.error("데이터 로드 실패:", e);
+    console.warn("서버 연결 대기 또는 오류:", e);
+  } finally {
     render();
   }
 }
@@ -279,7 +301,7 @@ function home(){
       <div class="stat"><b>${t.accuracy}%</b><span>누적 정답률</span></div>
     </div>
   </section>
-  ${incomplete?`<section class="section"><div class="notice warn">⚠️ 아직 연결되지 않은 경계 문제가 ${incomplete}개 있습니다.</div></section>`:""}
+  ${incomplete?`<section class="section"><div class="notice warn">⚠️️ 아직 연결되지 않은 경계 문제가 ${incomplete}개 있습니다.</div></section>`:""}
   <section class="title"><h1>과목 선택</h1><p>과목을 선택하여 세부 목차와 풀이량을 지정하세요.</p></section>
   <section class="section">
     ${(()=>{let map=subjectMap();return Object.keys(map).map(g=>`<div class="group"><b>${esc(g)}</b>${!SUBJECTS[g]?` <span class="badge warn">미등록 그룹</span>`:""}<div class="chips">${map[g].map(s=>{
@@ -652,7 +674,7 @@ function quizPage(){
         }).join("")}
     </div>
 
-    ${!S.submitted?`<button class="primary full" onclick="submitQ()" ${(!S.selected\vert{}\vert{}!S.selected.length)?"disabled":""}>정답 제출${!isBinary && S.selected.length ? ` (${S.selected.length}개 선택됨)` : ''}</button>`:""}
+    ${!S.submitted?`<button class="primary full" onclick="submitQ()" ${(!S.selected || !S.selected.length)?"disabled":""}>정답 제출${!isBinary && S.selected.length ? ` (${S.selected.length}개 선택됨)` : ''}</button>`:""}
     
     ${S.retryPrompt?`<div class="result wrong"><b>❌ 오답입니다.</b><p>다시 푸시겠습니까?</p><div class="row"><button class="primary" onclick="retryQ()">YES (다시 풀기)</button><button class="secondary" onclick="showAns()">NO (정답 보기)</button></div></div>`:""}
     
@@ -661,7 +683,7 @@ function quizPage(){
       <p style="margin:8px 0 4px">정답: <strong style="color:#173d2a;font-size:16px">${esc(q.answer||"(정답 미설정)")}</strong></p>
       <p style="margin:0 0 10px;font-size:13px;color:#666">내가 제출한 답: <b>${S.selected.length?esc(S.selected.join(', ')):'(선택 없음/시간초과)'}</b></p>
       <div class="explain"><b>해설</b><p>${esc(q.explanation||"해설이 없습니다.")}</p></div>
-      <div class="note"><b>내 메모</b><input value="${esc(notes[q.id]\vert{}\vert{}"")}" placeholder="메모를 입력하세요" onchange="setNote('${esc(q.id)}',this.value)"></div>
+      <div class="note"><b>내 메모</b><input value="${esc(notes[q.id] || "")}" placeholder="메모를 입력하세요" onchange="setNote('${esc(q.id)}',this.value)"></div>
       <button class="primary full" onclick="nextQ()">${S.qi===S.queue.length-1?"🎉 세트 완료 (학습 종료)":"다음 문제 →"}</button>
     </div>`:""}
   </section>`;
@@ -732,7 +754,6 @@ async function submitQ(isTimeout = false){
   let globalIdx=fullArr.findIndex(item=>item.id===q.id);
   if(globalIdx>=0) settings.lastIndex[S.subject]=globalIdx;
   
-  // 서버에 비동기 저장
   fetch('/api/stats', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -964,4 +985,837 @@ function bankFilterModal(){
   let sMap = subjectMap();
   let allSubjects = Object.values(sMap).flat();
 
-  let is
+  let isSubjectSelected = S.bankFilter.subject && S.bankFilter.subject !== "전체";
+  let subjQuestions = isSubjectSelected ? bank.filter(q=>q.subject === S.bankFilter.subject) : [];
+
+  let majorMap = {};
+  if(isSubjectSelected){
+    subjQuestions.forEach(q=>{
+      let m = q.categoryPath?.[0] || "기본단원";
+      majorMap[m] = (majorMap[m]||0) + 1;
+    });
+  }
+  let majorList = Object.keys(majorMap).map(k=>({name:k, count:majorMap[k]}));
+
+  let minorMap = {};
+  let isMajorSelected = isSubjectSelected && S.bankFilter.major && S.bankFilter.major !== "전체";
+  if(isMajorSelected){
+    subjQuestions.filter(q=>(q.categoryPath?.[0]||"기본단원")===S.bankFilter.major).forEach(q=>{
+      let min = q.categoryPath?.[1];
+      if(min) minorMap[min] = (minorMap[min]||0) + 1;
+    });
+  }
+  let minorList = Object.keys(minorMap).map(k=>({name:k, count:minorMap[k]}));
+
+  let detailMap = {};
+  let isMinorSelected = isMajorSelected && S.bankFilter.minor && S.bankFilter.minor !== "전체";
+  if(isMinorSelected){
+    subjQuestions.filter(q=>(q.categoryPath?.[0]||"기본단원")===S.bankFilter.major && q.categoryPath?.[1]===S.bankFilter.minor).forEach(q=>{
+      let det = q.categoryPath?.[2];
+      if(det) detailMap[det] = (detailMap[det]||0) + 1;
+    });
+  }
+  let detailList = Object.keys(detailMap).map(k=>({name:k, count:detailMap[k]}));
+
+  let pathItems = [];
+  if(isSubjectSelected) pathItems.push(S.bankFilter.subject);
+  if(isMajorSelected) pathItems.push(S.bankFilter.major);
+  if(isMinorSelected) pathItems.push(S.bankFilter.minor);
+  if(S.bankFilter.detail && S.bankFilter.detail !== "전체") pathItems.push(S.bankFilter.detail);
+  let currentPathText = pathItems.length ? pathItems.join(" > ") : "과목 전체";
+  let previewCount = getFilteredBankQuestions().length;
+
+  return `<div class="modalOverlay" onclick="if(event.target===this)closeBankFilterModal()">
+    <div class="modalContent">
+      <div class="modalHeader">
+        <b style="font-size:17px">⚙️ 문제 정렬 & 3단 목차 필터</b>
+        <button class="back" onclick="closeBankFilterModal()">✕</button>
+      </div>
+      <div class="modalBody">
+        <b>1. 정렬 및 풀이 조건</b>
+        <div class="chips" style="margin-bottom:16px">
+          ${[
+            ['default','기본 번호순'],
+            ['wrong','오답 많은 순'],
+            ['rate_asc','정답률 낮은 순'],
+            ['unsolved','미풀이 문제만'],
+            ['bookmark','⭐ 북마크만']
+          ].map(([k,label])=>`
+            <button class="${S.bankFilter.sort===k?'active':''}" onclick="S.bankFilter.sort='${k}';render()">${label}</button>
+          `).join('')}
+        </div>
+
+        <b>2. 과목 선택</b>
+        <div class="chips" style="margin-bottom:14px">
+          <button class="${S.bankFilter.subject==='전체'?'active':''}" onclick="setFilterSubject('전체')">과목 전체</button>
+          ${allSubjects.map(sub=>`
+            <button class="${S.bankFilter.subject===sub?'active':''}" onclick="setFilterSubject('${esc(sub)}')">${esc(sub)}</button>
+          `).join('')}
+        </div>
+
+        <b>3. 단원 목차 선택 (대 · 중 · 소단원)</b>
+        ${!isSubjectSelected?`
+          <div class="notice" style="margin-top:8px">
+            💡 위 <b>과목 선택</b>에서 특정 과목을 누르면 해당 과목의 <b>3단 목차 스크롤창</b>이 표시됩니다.
+          </div>
+        `:`
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px;height:210px">
+            <div style="border:1px solid #dfe4e1;border-radius:10px;display:flex;flex-direction:column;overflow:hidden;background:#fff">
+              <div style="padding:7px 10px;background:#f5f7f6;font-size:11px;font-weight:bold;border-bottom:1px solid #dfe4e1;color:#555">
+                대단원 (${majorList.length})
+              </div>
+              <div style="overflow-y:auto;flex:1;padding:5px" class="colList">
+                <button class="colItem ${S.bankFilter.major==='전체'?'active':''}" onclick="setFilterMajor('전체')">대단원 전체</button>
+                ${majorList.map(m=>`
+                  <button class="colItem ${S.bankFilter.major===m.name?'active':''}" onclick="setFilterMajor('${esc(m.name)}')">
+                    ${esc(m.name)} <small>(${m.count})</small>
+                  </button>
+                `).join('')}
+              </div>
+            </div>
+
+            <div style="border:1px solid #dfe4e1;border-radius:10px;display:flex;flex-direction:column;overflow:hidden;background:#fff">
+              <div style="padding:7px 10px;background:#f5f7f6;font-size:11px;font-weight:bold;border-bottom:1px solid #dfe4e1;color:#555">
+                중단원 ${minorList.length ? `(${minorList.length})` : ''}
+              </div>
+              <div style="overflow-y:auto;flex:1;padding:5px" class="colList">
+                ${!isMajorSelected ? `<div style="padding:10px 6px;font-size:11px;color:#888;text-align:center">대단원을<br>선택하세요</div>` :
+                  (minorList.length ? `
+                    <button class="colItem ${S.bankFilter.minor==='전체'?'active':''}" onclick="setFilterMinor('전체')">중단원 전체</button>
+                    ${minorList.map(min=>`
+                      <button class="colItem ${S.bankFilter.minor===min.name?'active':''}" onclick="setFilterMinor('${esc(min.name)}')">
+                        ${esc(min.name)} <small>(${min.count})</small>
+                      </button>
+                    `).join('')}
+                  ` : `<div style="padding:10px 6px;font-size:11px;color:#888;text-align:center">(하위 중단원 없음)</div>`)}
+              </div>
+            </div>
+
+            <div style="border:1px solid #dfe4e1;border-radius:10px;display:flex;flex-direction:column;overflow:hidden;background:#fff">
+              <div style="padding:7px 10px;background:#f5f7f6;font-size:11px;font-weight:bold;border-bottom:1px solid #dfe4e1;color:#555">
+                소단원 ${detailList.length ? `(${detailList.length})` : ''}
+              </div>
+              <div style="overflow-y:auto;flex:1;padding:5px" class="colList">
+                ${!isMinorSelected ? `<div style="padding:10px 6px;font-size:11px;color:#888;text-align:center">중단원을<br>선택하세요</div>` :
+                  (detailList.length ? `
+                    <button class="colItem ${S.bankFilter.detail==='전체'?'active':''}" onclick="setFilterDetail('전체')">소단원 전체</button>
+                    ${detailList.map(det=>`
+                      <button class="colItem ${S.bankFilter.detail===det.name?'active':''}" onclick="setFilterDetail('${esc(det.name)}')">
+                        ${esc(det.name)} <small>(${det.count})</small>
+                      </button>
+                    `).join('')}
+                  ` : `<div style="padding:10px 6px;font-size:11px;color:#888;text-align:center">(하위 소단원 없음)</div>`)}
+              </div>
+            </div>
+          </div>
+        `}
+
+        <div class="card" style="margin-top:14px;background:#f6f8f7;padding:12px 14px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:13px">📍 선택 범위: <b>${esc(currentPathText)}</b></span>
+            <b style="color:#173d2a;font-size:16px">${previewCount} 문제</b>
+          </div>
+        </div>
+      </div>
+      <div class="modalFooter">
+        <button class="secondary" style="flex:1" onclick="clearBankFilters()">초기화</button>
+        <button class="primary" style="flex:2" onclick="closeBankFilterModal()">필터 적용하기</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ---------------- 문제 직접 추가 모달 & 목차 자동 연동 로직 ----------------
+function openAddModal(){
+  let sMap = subjectMap();
+  let groups = Object.keys(sMap);
+  let defaultGroup = groups[0] || "공법";
+  let defaultSubj = (sMap[defaultGroup] && sMap[defaultGroup][0]) || "헌법";
+
+  S.addDraft = {
+    group: defaultGroup,
+    customGroup: "",
+    subject: defaultSubj,
+    customSubject: "",
+    catMode: "select",
+    selectedMajor: "",
+    selectedMinor: "",
+    selectedDetail: "",
+    customCategory: "",
+    type: "ox",
+    text: "",
+    choices: ["", "", "", ""],
+    answer: "O",
+    explanation: ""
+  };
+  S.addErrors = {};
+  initAddDraftCategory();
+  S.showAddModal = true;
+  render();
+}
+
+function initAddDraftCategory(){
+  let d = S.addDraft;
+  if(!d) return;
+  let s = d.subject === "직접입력" ? d.customSubject.trim() : d.subject;
+  let tree = buildTocTree(d.group === "직접입력" ? "" : d.group, s);
+  let majorKeys = Object.keys(tree);
+
+  if(majorKeys.length > 0){
+    d.catMode = "select";
+    d.selectedMajor = majorKeys[0];
+    let minors = Object.keys(tree[d.selectedMajor]?.children || {});
+    d.selectedMinor = minors[0] || "";
+    let details = d.selectedMinor ? Object.keys(tree[d.selectedMajor].children[d.selectedMinor]?.children || {}) : [];
+    d.selectedDetail = details[0] || "";
+  } else {
+    d.catMode = "custom";
+    d.customCategory = "";
+  }
+}
+
+function closeAddModal(){
+  S.showAddModal = false;
+  S.addDraft = null;
+  S.addErrors = {};
+  render();
+}
+
+function updateAddField(f, val){
+  if(!S.addDraft) return;
+  S.addDraft[f] = val;
+  if(S.addErrors[f]) delete S.addErrors[f];
+}
+
+function onAddGroupChange(val){
+  if(!S.addDraft) return;
+  S.addDraft.group = val;
+  if(val !== "직접입력"){
+    let sMap = subjectMap();
+    let subjs = sMap[val] || [];
+    S.addDraft.subject = subjs[0] || "직접입력";
+  } else {
+    S.addDraft.subject = "직접입력";
+  }
+  if(S.addErrors.group) delete S.addErrors.group;
+  if(S.addErrors.subject) delete S.addErrors.subject;
+  initAddDraftCategory();
+  render();
+}
+
+function onAddSubjectChange(val){
+  if(!S.addDraft) return;
+  S.addDraft.subject = val;
+  if(S.addErrors.subject) delete S.addErrors.subject;
+  initAddDraftCategory();
+  render();
+}
+
+function onAddMajorChange(val){
+  if(!S.addDraft) return;
+  if(val === "_custom_"){
+    S.addDraft.catMode = "custom";
+    render();
+    return;
+  }
+  S.addDraft.selectedMajor = val;
+  let s = S.addDraft.subject === "직접입력" ? S.addDraft.customSubject.trim() : S.addDraft.subject;
+  let tree = buildTocTree(S.addDraft.group === "직접입력" ? "" : S.addDraft.group, s);
+  let minors = Object.keys(tree[val]?.children || {});
+  S.addDraft.selectedMinor = minors[0] || "";
+  let details = S.addDraft.selectedMinor ? Object.keys(tree[val].children[S.addDraft.selectedMinor]?.children || {}) : [];
+  S.addDraft.selectedDetail = details[0] || "";
+  render();
+}
+
+function onAddMinorChange(val){
+  if(!S.addDraft) return;
+  S.addDraft.selectedMinor = val;
+  let s = S.addDraft.subject === "직접입력" ? S.addDraft.customSubject.trim() : S.addDraft.subject;
+  let tree = buildTocTree(S.addDraft.group === "직접입력" ? "" : S.addDraft.group, s);
+  let details = val ? Object.keys(tree[S.addDraft.selectedMajor]?.children[val]?.children || {}) : [];
+  S.addDraft.selectedDetail = details[0] || "";
+  render();
+}
+
+function updateAddChoice(i, val){
+  if(!S.addDraft) return;
+  S.addDraft.choices[i] = val;
+  if(S.addErrors.choices) delete S.addErrors.choices;
+}
+
+function addDraftChoiceItem(){
+  if(!S.addDraft) return;
+  S.addDraft.choices.push("");
+  render();
+}
+
+function removeDraftChoiceItem(i){
+  if(!S.addDraft) return;
+  S.addDraft.choices.splice(i, 1);
+  render();
+}
+
+async function submitNewQuestion(){
+  let d = S.addDraft;
+  if(!d) return;
+
+  let errors = {};
+  let finalGroup = d.group === "직접입력" ? d.customGroup.trim() : d.group.trim();
+  let finalSubject = d.subject === "직접입력" ? d.customSubject.trim() : d.subject.trim();
+
+  // 1. 그룹 및 과목 검증
+  if(!finalGroup) errors.group = "과목 분류(그룹)를 입력하거나 선택해 주세요.";
+  if(!finalSubject) errors.subject = "과목명을 입력하거나 선택해 주세요.";
+
+  // 2. 본문 검증
+  if(!d.text.trim()) errors.text = "문제 본문 내용을 입력해 주세요.";
+
+  // 3. 선지 검증 (객관식)
+  if(d.type === "mcq"){
+    let validChoices = d.choices.map(c=>c.trim()).filter(Boolean);
+    if(!validChoices.length){
+      errors.choices = "객관식 보기를 최소 1개 이상 입력해야 합니다.";
+    }
+  }
+
+  // 4. 정답 검증
+  let cleanAns = d.answer.trim();
+  if(!cleanAns){
+    errors.answer = "정답을 입력해 주세요.";
+  } else if(d.type === "ox" && !["O","X"].includes(cleanAns.toUpperCase())){
+    errors.answer = "OX 문제는 정답을 O 또는 X로 지정해야 합니다.";
+  }
+
+  if(Object.keys(errors).length > 0){
+    S.addErrors = errors;
+    alert("⚠️ 필수 기재 항목이 누락되었습니다. 붉은색 입력창을 확인해 주세요.");
+    render();
+    return;
+  }
+
+  // 5. 단원 카테고리 구성
+  let catPath = [];
+  if(d.catMode === "select" && d.selectedMajor){
+    catPath = [d.selectedMajor, d.selectedMinor, d.selectedDetail].filter(Boolean).map(x=>x.trim());
+  } else {
+    let cat = d.customCategory.trim() || "기본단원";
+    catPath = cat.split(">").map(x=>x.trim()).filter(Boolean);
+  }
+  if(!catPath.length) catPath = ["기본단원"];
+
+  let finalChoices = d.type === "mcq" ? d.choices.map(c=>c.trim()).filter(Boolean) : [];
+
+  let newQ = {
+    id: "custom-" + Date.now(),
+    number: String(bank.length + 1),
+    group: finalGroup || "기타",
+    subject: finalSubject,
+    categoryPath: catPath,
+    category: catPath.join(" > "),
+    type: d.type,
+    text: d.text.trim(),
+    choices: finalChoices,
+    answer: d.type === "ox" ? cleanAns.toUpperCase() : cleanAns,
+    explanation: d.explanation.trim() || "(해설이 없습니다.)",
+    incomplete: false,
+    sourcePages: ""
+  };
+  newQ.issues = issuesFor(newQ);
+
+  await fetch('/api/question', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(newQ)
+  });
+
+  bank.push(newQ);
+  alert(`✅ 문제가 성공적으로 등록되었습니다!\n[${newQ.group} > ${newQ.subject}] ${newQ.category}\n정답: ${newQ.answer}`);
+  closeAddModal();
+}
+
+function addQuestionModal(){
+  let d = S.addDraft;
+  let sMap = subjectMap();
+  let groups = Object.keys(sMap);
+  let curGroupSubjs = (d.group !== "직접입력" && sMap[d.group]) ? sMap[d.group] : [];
+  let err = S.addErrors || {};
+
+  let currentSubjectName = d.subject === "직접입력" ? d.customSubject.trim() : d.subject;
+  let currentGroupName = d.group === "직접입력" ? "" : d.group;
+  let tree = buildTocTree(currentGroupName, currentSubjectName);
+  let majorKeys = Object.keys(tree);
+  let hasJsonToc = majorKeys.length > 0;
+
+  let minorKeys = (d.selectedMajor && tree[d.selectedMajor]) ? Object.keys(tree[d.selectedMajor].children) : [];
+  let detailKeys = (d.selectedMajor && d.selectedMinor && tree[d.selectedMajor].children[d.selectedMinor]) ? Object.keys(tree[d.selectedMajor].children[d.selectedMinor].children) : [];
+
+  return `<div class="modalOverlay" onclick="if(event.target===this)closeAddModal()">
+    <div class="modalContent">
+      <div class="modalHeader">
+        <b style="font-size:17px">➕ 문제 직접 등록</b>
+        <button class="back" onclick="closeAddModal()">✕</button>
+      </div>
+      <div class="modalBody reviewBox" style="padding-top:10px">
+        
+        <div style="display:flex;justify-content:space-between;align-items:center;margin:14px 0 6px">
+          <label style="margin:0"><b>과목 분류 및 과목 선택 <span style="color:#d94848">*</span></b></label>
+          <span style="font-size:11px;color:#777">왼쪽: 대분류 / 오른쪽: 세부과목</span>
+        </div>
+        
+        <div class="row">
+          <div style="flex:1">
+            <select class="${err.group?'inputError':''}" onchange="onAddGroupChange(this.value)">
+              ${groups.map(g=>`<option value="${esc(g)}" ${d.group===g?'selected':''}>📁 ${esc(g)}</option>`).join('')}
+              <option value="직접입력" ${d.group==='직접입력'?'selected':''}>+ 그룹 직접 입력</option>
+            </select>
+            ${d.group === '직접입력' ? `
+              <input class="${err.group?'inputError':''}" style="margin-top:6px" placeholder="분류명 입력 (예: 공법)" value="${esc(d.customGroup)}" oninput="updateAddField('customGroup', this.value)">
+            ` : ''}
+            ${err.group ? `<span class="errMsg">⚠️ ${err.group}</span>` : ''}
+          </div>
+
+          <div style="flex:1">
+            <select class="${err.subject?'inputError':''}" onchange="onAddSubjectChange(this.value)">
+              ${curGroupSubjs.map(sub=>`<option value="${esc(sub)}" ${d.subject===sub?'selected':''}>📘 ${esc(sub)}</option>`).join('')}
+              <option value="직접입력" ${d.subject==='직접입력'?'selected':''}>+ 과목 직접 입력</option>
+            </select>
+            ${d.subject === '직접입력' ? `
+              <input class="${err.subject?'inputError':''}" style="margin-top:6px" placeholder="과목명 입력 (예: 헌법)" value="${esc(d.customSubject)}" oninput="updateAddField('customSubject', this.value);initAddDraftCategory();render();">
+            ` : ''}
+            ${err.subject ? `<span class="errMsg">⚠️ ${err.subject}</span>` : ''}
+          </div>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;margin:18px 0 6px">
+          <label style="margin:0"><b>단원 목차 (대 · 중 · 소분류)</b></label>
+          ${hasJsonToc ? `
+            <button class="badge btn" style="font-size:11px" onclick="S.addDraft.catMode = (S.addDraft.catMode==='select'?'custom':'select');render()">
+              ${d.catMode === 'select' ? '✏️ 단원 직접 입력하기' : '📋 기존 JSON 목차에서 고르기'}
+            </button>
+          ` : `
+            <span class="badge gray">등록된 목차 없음 (직접 입력)</span>
+          `}
+        </div>
+
+        ${hasJsonToc && d.catMode === 'select' ? `
+          <div style="background:#f8faf9;border:1px solid #dfe5e2;border-radius:12px;padding:10px">
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">
+              <div>
+                <span style="font-size:10px;color:#666;font-weight:700">대분류</span>
+                <select style="margin-top:3px;padding:7px 5px;font-size:12px" onchange="onAddMajorChange(this.value)">
+                  ${majorKeys.map(m=>`<option value="${esc(m)}" ${d.selectedMajor===m?'selected':''}>${esc(m)}</option>`).join('')}
+                  <option value="_custom_">+ 직접 입력</option>
+                </select>
+              </div>
+              <div>
+                <span style="font-size:10px;color:#666;font-weight:700">중분류</span>
+                <select style="margin-top:3px;padding:7px 5px;font-size:12px" onchange="onAddMinorChange(this.value)">
+                  <option value="">(없음)</option>
+                  ${minorKeys.map(min=>`<option value="${esc(min)}" ${d.selectedMinor===min?'selected':''}>${esc(min)}</option>`).join('')}
+                </select>
+              </div>
+              <div>
+                <span style="font-size:10px;color:#666;font-weight:700">소분류</span>
+                <select style="margin-top:3px;padding:7px 5px;font-size:12px" onchange="S.addDraft.selectedDetail=this.value;render()">
+                  <option value="">(없음)</option>
+                  ${detailKeys.map(det=>`<option value="${esc(det)}" ${d.selectedDetail===det?'selected':''}>${esc(det)}</option>`).join('')}
+                </select>
+              </div>
+            </div>
+            <div style="margin-top:8px;font-size:11px;color:#245c35">
+              📌 선택 단원: <b>${esc([d.selectedMajor, d.selectedMinor, d.selectedDetail].filter(Boolean).join(' > ') || '기본단원')}</b>
+            </div>
+          </div>
+        ` : `
+          <div>
+            <input placeholder="예: 상법총칙 > 상행위 > 대리 (구분자는 ' > ' 입력)" value="${esc(d.customCategory)}" oninput="updateAddField('customCategory', this.value)">
+            <small style="color:#888;font-size:11px;display:block;margin-top:4px">💡 미입력 시 '기본단원'으로 자동 등록됩니다.</small>
+          </div>
+        `}
+
+        <label style="margin-top:16px"><b>문제 유형 <span style="color:#d94848">*</span></b></label>
+        <div class="segmentedControl" style="margin-top:0">
+          <button class="${d.type==='ox'?'active':''}" onclick="S.addDraft.type='ox';S.addDraft.answer='O';render()">OX 문제</button>
+          <button class="${d.type==='mcq'?'active':''}" onclick="S.addDraft.type='mcq';S.addDraft.answer='1';render()">객관식 (4~5지선다)</button>
+        </div>
+
+        <label><b>문제 본문 / 지문 <span style="color:#d94848">*</span></b></label>
+        <textarea class="${err.text?'inputError':''}" rows="4" placeholder="문제를 입력하세요 (필수)" oninput="updateAddField('text', this.value)">${esc(d.text)}</textarea>
+        ${err.text ? `<span class="errMsg">⚠️ ${err.text}</span>` : ''}
+
+        ${d.type === 'mcq' ? `
+          <div style="display:flex;justify-content:space-between;align-items:center;margin:14px 0 6px">
+            <label style="margin:0"><b>객관식 선지 <span style="color:#d94848">*</span></b></label>
+            <button class="badge btn" onclick="addDraftChoiceItem()">+ 선지 추가</button>
+          </div>
+          ${d.choices.map((c, i)=>`
+            <div class="row" style="margin-bottom:6px;align-items:center">
+              <span class="badge gray" style="min-width:24px;text-align:center">${i+1}</span>
+              <input class="${err.choices?'inputError':''}" placeholder="선지 ${i+1} 내용" value="${esc(c)}" oninput="updateAddChoice(${i}, this.value)">
+              <button class="danger" style="flex:0 0 auto;padding:8px 12px;font-size:12px" onclick="removeDraftChoiceItem(${i})">삭제</button>
+            </div>
+          `).join('')}
+          ${err.choices ? `<span class="errMsg">⚠️️ ${err.choices}</span>` : ''}
+
+          <label><b>정답 번호 <span style="color:#d94848">*</span></b> <small style="color:#777">(복수 정답은 쉼표 구분: 예: 1, 3)</small></label>
+          <input class="${err.answer?'inputError':''}" placeholder="예: 1 또는 3" value="${esc(d.answer)}" oninput="updateAddField('answer', this.value)">
+          ${err.answer ? `<span class="errMsg">⚠️ ${err.answer}</span>` : ''}
+        ` : `
+          <label><b>정답 선택 <span style="color:#d94848">*</span></b></label>
+          <div class="segmentedControl" style="margin-top:0">
+            <button class="${d.answer==='O'?'active':''}" onclick="updateAddField('answer','O');render()">O</button>
+            <button class="${d.answer==='X'?'active':''}" onclick="updateAddField('answer','X');render()">X</button>
+          </div>
+        `}
+
+        <label><b>해설 (선택)</b></label>
+        <textarea rows="3" placeholder="해설을 입력하세요 (미입력 가능)" oninput="updateAddField('explanation', this.value)">${esc(d.explanation)}</textarea>
+
+      </div>
+      <div class="modalFooter">
+        <button class="secondary" style="flex:1" onclick="closeAddModal()">취소</button>
+        <button class="primary" style="flex:2" onclick="submitNewQuestion()">💾 문제 등록하기</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ---------------- 멀티 파일 업로드 & 서버 병합 로직 ----------------
+function importPage(){
+  let newSubjects = new Set(S.pendingQuestions.map(q=>q.subject||"미분류"));
+  return topBar("문제 파일 불러오기")+`
+  <section class="title"><h1>JSON 문제 파일 등록</h1>
+  <p>과목별 분리 JSON 파일을 여러 개 선택하여 한 번에 서버 DB에 병합하거나 추가할 수 있습니다.</p></section>
+  <section class="section">
+    <div class="upload">
+      <div class="ico">📚</div>
+      <h2>JSON 파일 선택 (다중 선택 가능)</h2>
+      <p class="notice"><code>Ctrl</code> 또는 <code>Shift</code> 키를 누른 채 여러 JSON 파일을 한 번에 선택할 수 있습니다.</p>
+      <input id="jsonFiles" type="file" accept=".json,application/json" multiple class="hidden" onchange="multipleFilesChosen(this)">
+      <button class="primary" onclick="document.getElementById('jsonFiles').click()">JSON 파일 선택하기</button>
+      ${S.files.length?`<div class="file" style="margin-top:14px">
+        <b>선택된 파일 (${S.files.length}개):</b><br>
+        ${S.files.map(f=>`• ${esc(f.name)}`).join('<br>')}
+      </div>`:""}
+    </div>
+  </section>
+  
+  ${S.pendingQuestions.length?`
+    <section class="section">
+      <div class="card">
+        <b>불러온 파일 분석 결과</b>
+        <div class="kpi">
+          <div><b>${S.files.length}</b><span>선택 파일 수</span></div>
+          <div><b>${S.pendingQuestions.length}</b><span>총 문제 수</span></div>
+          <div><b>${newSubjects.size}</b><span>감지된 과목 수</span></div>
+          <div><b>${bank.length}</b><span>현재 저장된 문제</span></div>
+        </div>
+        <div class="chips" style="margin-top:12px">
+          ${[...newSubjects].map(s=>`<span class="badge blue">${esc(s)} (${S.pendingQuestions.filter(q=>q.subject===s).length}개)</span>`).join(' ')}
+        </div>
+      </div>
+      
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:14px">
+        <button class="primary full" style="padding:16px" onclick="applyImport('merge')">
+          ➕ 서버 DB에 [추가 및 병합] (권장)
+        </button>
+        <button class="secondary full" style="padding:14px" onclick="applyImport('replace')">
+          ⚠️ 기존 문제 모두 지우고 [새로 덮어쓰기]
+        </button>
+        <button class="danger full" onclick="clearImport()">취소</button>
+      </div>
+    </section>
+  `:""}
+  `;
+}
+
+function multipleFilesChosen(input){
+  let fileList = Array.from(input.files || []);
+  if(!fileList.length) return;
+  S.files = fileList;
+  S.pendingQuestions = [];
+  S.pendingMetaList = [];
+
+  let readPromises = fileList.map(f=>{
+    return new Promise((resolve, reject)=>{
+      let r = new FileReader();
+      r.onload = ()=>{
+        try {
+          let d = JSON.parse(r.result);
+          let {meta, qs} = validateSingleFile(d);
+          resolve({meta, qs});
+        } catch(e) {
+          reject(new Error(`[${f.name}] ${e.message}`));
+        }
+      };
+      r.readAsText(f);
+    });
+  });
+
+  Promise.all(readPromises).then(results=>{
+    let allQs = [];
+    results.forEach(res=>{
+      S.pendingMetaList.push(res.meta);
+      allQs.push(...res.qs);
+    });
+    let seen = new Set();
+    allQs.forEach((q, idx)=>{
+      if(seen.has(q.id)){
+        q.id = q.id + "_dup" + idx;
+      }
+      seen.add(q.id);
+    });
+    S.pendingQuestions = allQs;
+    render();
+  }).catch(err=>{
+    alert("파일 읽기 오류: " + err.message);
+    clearImport();
+  });
+}
+
+async function applyImport(mode){
+  if(!S.pendingQuestions.length) return;
+
+  if(mode === 'replace'){
+    if(!confirm("서버의 모든 문제가 삭제되고 선택한 파일의 문제로 대체됩니다. 계속하시겠습니까?")) return;
+  }
+
+  const res = await fetch('/api/import', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ questions: S.pendingQuestions, mode })
+  });
+  const data = await res.json();
+  
+  alert(`서버 업데이트 완료! (${data.count}문제 반영됨)`);
+  clearImport();
+  await fetchBootstrap();
+  go('home');
+}
+
+function clearImport(){
+  S.files = [];
+  S.pendingQuestions = [];
+  S.pendingMetaList = [];
+  render();
+}
+
+function openEdit(id){
+  stopTimer();
+  let q=bank.find(x=>x.id===id);
+  if(!q)return;
+  S.editingId=id;
+  S.editDraft={
+    number:q.number,type:q.type,text:q.text,
+    choices:q.choices.slice(),answer:q.answer,
+    explanation:q.explanation,group:q.group,subject:q.subject,category:q.category||"기본단원"
+  };
+  render();
+}
+function closeEdit(){
+  S.editingId=null;
+  S.editDraft=null;
+  render();
+  startTimerIfNeeded();
+}
+function updateEditField(field,v){if(S.editDraft)S.editDraft[field]=v}
+function updateEditType(v){if(!S.editDraft)return;S.editDraft.type=v;render()}
+function updateEditChoice(i,v){if(S.editDraft)S.editDraft.choices[i]=v}
+function addEditChoice(){if(!S.editDraft)return;S.editDraft.choices.push("");render()}
+function removeEditChoice(i){if(!S.editDraft)return;S.editDraft.choices.splice(i,1);render()}
+
+async function saveEdit(){
+  let q=bank.find(x=>x.id===S.editingId);
+  if(!q||!S.editDraft)return;
+  let d=S.editDraft;
+  q.number=String(d.number??q.number);
+  q.group=String(d.group??"");
+  q.subject=String(d.subject??"");
+  q.category=String(d.category??"기본단원");
+  q.categoryPath=q.category.split(">").map(x=>x.trim()).filter(Boolean);
+  q.type=d.type==="ox"?"ox":"mcq";
+  q.text=String(d.text??"");
+  q.choices=q.type==="mcq"?d.choices.map(c=>String(c??"")):[];
+  q.answer=q.type==="ox"?String(d.answer??"").toUpperCase():String(d.answer??"");
+  q.explanation=String(d.explanation??"");
+  q.issues=issuesFor(q);
+
+  await fetch('/api/question', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(q)
+  });
+
+  if(S.queue&&S.queue.length){
+    let qi=S.queue.findIndex(x=>x.id===q.id);
+    if(qi>=0)S.queue[qi]=q;
+  }
+  S.editingId=null;S.editDraft=null;
+  render();
+  startTimerIfNeeded();
+}
+
+async function deleteQuestion(id){
+  if(!confirm("이 문제를 서버 DB에서 영구 삭제하시겠습니까?"))return;
+  await fetch(`/api/question/${id}`, { method: 'DELETE' });
+  
+  bank=bank.filter(q=>q.id!==id);
+  delete stats[id];
+  bookmarks=bookmarks.filter(x=>x!==id);
+  delete notes[id];
+  
+  S.editingId=null;S.editDraft=null;
+  if(S.queue&&S.queue.length){
+    let wasIdx=S.queue.findIndex(q=>q.id===id);
+    S.queue=S.queue.filter(q=>q.id!==id);
+    if(!S.queue.length){alert("남은 문제가 없습니다.");go("home");return}
+    if(wasIdx>=0){
+      S.qi=Math.min(S.qi,S.queue.length-1);
+      S.selected=[];S.submitted=false;S.retryPrompt=false;S.retrying=false;
+    }
+  }
+  render();
+  startTimerIfNeeded();
+}
+
+function editForm(){
+  let d=S.editDraft;
+  return `<div class="card" style="margin-top:12px;border:2px solid #173d2a">
+    <b>✏️ 문제 수정 (서버 반영)</b>
+    <div class="reviewBox">
+      <label>문제 번호</label><input value="${esc(d.number)}" onchange="updateEditField('number',this.value)">
+      <div class="row">
+        <div><label>과목 분류 (그룹)</label><input value="${esc(d.group)}" onchange="updateEditField('group',this.value)"></div>
+        <div><label>과목</label><input value="${esc(d.subject)}" onchange="updateEditField('subject',this.value)"></div>
+      </div>
+      <label>목차 / 세부 단원 (구분자는 ' > ' 사용)</label>
+      <input value="${esc(d.category)}" placeholder="예: 상법총칙 > 영업양도" onchange="updateEditField('category',this.value)">
+      <label>문제 유형</label>
+      <select onchange="updateEditType(this.value)">
+        <option value="mcq" ${d.type==="mcq"?"selected":""}>객관식</option>
+        <option value="ox" ${d.type==="ox"?"selected":""}>OX</option>
+      </select>
+      <label>본문</label><textarea rows="4" onchange="updateEditField('text',this.value)">${esc(d.text)}</textarea>
+      ${d.type==="mcq"?`
+        <label>선지</label>
+        ${d.choices.map((c,i)=>`<div class="row" style="margin-bottom:6px;align-items:center">
+          <input value="${esc(c)}" onchange="updateEditChoice(${i},this.value)" placeholder="선지 ${i+1}">
+          <button class="danger" style="flex:0 0 auto" onclick="removeEditChoice(${i})">삭제</button>
+        </div>`).join("")}
+        <button class="secondary full" onclick="addEditChoice()">+ 선지 추가</button>
+        <label>정답 번호 (복수 정답일 경우 쉼표로 구분 예: 1, 3, 4)</label><input value="${esc(d.answer)}" onchange="updateEditField('answer',this.value)">
+      `:`
+        <label>정답</label>
+        <select onchange="updateEditField('answer',this.value)">
+          <option value="O" ${d.answer==="O"?"selected":""}>O</option>
+          <option value="X" ${d.answer==="X"?"selected":""}>X</option>
+        </select>
+      `}
+      <label>해설</label><textarea rows="4" onchange="updateEditField('explanation',this.value)">${esc(d.explanation)}</textarea>
+    </div>
+    <div class="row" style="margin-top:14px">
+      <button class="primary" onclick="saveEdit()">저장</button>
+      <button class="secondary" onclick="closeEdit()">취소</button>
+    </div>
+    <button class="danger full" style="margin-top:8px" onclick="deleteQuestion('${esc(S.editingId)}')">🗑️ 이 문제 삭제</button>
+  </div>`;
+}
+
+function wrongPage(){
+  let arr=bank.filter(q=>st(q.id).wrong>0);
+  return topBar("오답노트")+`<section class="title"><h1>오답노트</h1><p>${arr.length}문제</p></section><section class="section">
+  ${arr.length?arr.map(q=>{
+    if(S.editingId===q.id)return `<div class="listItem">${editForm()}</div>`;
+    let t=st(q.id);return `<div class="listItem">
+      <div style="display:flex;gap:5px;margin-bottom:6px">
+        <span class="badge">${esc(q.subject)}</span>
+        <span class="badge blue">${esc(q.category||"기본단원")}</span>
+      </div>
+      <p><b>${esc(q.number)}.${esc(q.text)}</b></p>
+      <small>오답 ${t.wrong}회 · 정답률 ${t.attempts?Math.round(t.correct/t.attempts*100):0}\% ${notes[q.id]?`· ${esc(notes[q.id])}`:""}</small>
+      <div class="row" style="margin-top:10px">
+        <button class="secondary" onclick="openEdit('${esc(q.id)}')">✏️ 수정</button>
+        <button class="danger" onclick="deleteQuestion('${esc(q.id)}')">🗑️ 삭제</button>
+      </div>
+    </div>`}).join(""):`<div class="empty">아직 오답이 없습니다.</div>`}
+  </section>`;
+}
+
+function bookmarkPage(){
+  let arr=bank.filter(q=>bookmarks.includes(q.id));
+  return topBar("북마크")+`<section class="title"><h1>⭐ 북마크</h1><p>${arr.length}문제</p></section><section class="section">
+  ${arr.length?arr.map(q=>{
+    if(S.editingId===q.id)return `<div class="listItem">${editForm()}</div>`;
+    return `<div class="listItem">
+      <div style="display:flex;gap:5px;margin-bottom:6px">
+        <span class="badge">${esc(q.subject)}</span>
+        <span class="badge blue">${esc(q.category||"기본단원")}</span>
+      </div>
+      <p><b>${esc(q.number)}.${esc(q.text)}</b></p>
+      <small>${notes[q.id]?esc(notes[q.id]):"비고 없음"}</small>
+      <div class="row" style="margin-top:10px">
+        <button class="secondary" onclick="openEdit('${esc(q.id)}')">✏️ 수정</button>
+        <button class="danger" onclick="deleteQuestion('${esc(q.id)}')">🗑️ 삭제</button>
+      </div>
+    </div>`}).join(""):`<div class="empty">북마크한 문제가 없습니다.</div>`}
+  </section>`;
+}
+
+function bottom(){return `<div class="bottom">
+  <button onclick="go('home')">⌂<small>홈</small></button>
+  <button onclick="go('bankPage')">📚<small>문제은행</small></button>
+  <button onclick="go('wrongPage')">📕<small>오답</small></button>
+  <button onclick="go('bookmarkPage')">⭐<small>북마크</small></button>
+</div>`}
+
+function exportMaster(){
+  let data={
+    version:5,
+    bookTitle:masterMeta.bookTitle||"LAW QUIZ 통합 문제은행",
+    processing:masterMeta.processing||{lastSourcePage:null,hasIncompleteQuestion:bank.some(q=>q.incomplete),incompleteQuestionId:null},
+    questions:bank.map(q=>({
+      id:q.id,number:q.number,group:q.group,subject:q.subject,categoryPath:q.categoryPath,category:q.category,type:q.type,text:q.text,
+      choices:q.choices,answer:q.answer,explanation:q.explanation,
+      ...(q.incomplete?{incomplete:true}:{}),
+      ...(q.sourcePages?{sourcePages:q.sourcePages}:{})
+    })),
+    warnings:Array.isArray(masterMeta.warnings)?masterMeta.warnings:[],
+    exportedAt:new Date().toISOString()
+  };
+  let blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+  let a=document.createElement("a");a.href=URL.createObjectURL(blob);
+  a.download="master_questions_all_"+new Date().toISOString().slice(0,10)+".json";a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+
+function exportProgress(){
+  let data={version:5,exportedAt:new Date().toISOString(),stats,settings,bookmarks,notes};
+  let blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+  let a=document.createElement("a");a.href=URL.createObjectURL(blob);
+  a.download="lawquiz_progress_all_"+new Date().toISOString().slice(0,10)+".json";a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+
+function restoreProgress(input){
+  let f=input.files[0];if(!f)return;
+  let r=new FileReader();
+  r.onload=()=>{
+    try{
+      let d=JSON.parse(r.result);
+      if(!d.stats||!d.settings)throw Error("학습기록 JSON 형식이 아닙니다.");
+      stats=d.stats;settings=d.settings;bookmarks=Array.isArray(d.bookmarks)?d.bookmarks:[];notes=d.notes||{};
+      alert("학습기록을 불러왔습니다.");render();
+    }catch(e){alert("복원 실패: "+e.message)}
+  };
+  r.readAsText(f);
+}
+
+// 1. 화면 즉시 렌더링 (흰 화면 방지)
+render();
+
+// 2. 서버 DB 데이터 비동기 로드
+fetchBootstrap();
+</script>
+</body>
+</html>
