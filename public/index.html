@@ -1092,7 +1092,7 @@ function testPlayPage(){
     <section class="section">
       <div class="progress"><span style="width:${((S.testQi+1)/S.testQueue.length)*100}%"></span></div>
       
-      <div style="display:flex;justify-content:space-between;align-items:center;margin:12px 0 8px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-irr:12px 0 8px">
         <span class="meta"><b>문제 ${S.testQi+1}</b> / ${S.testQueue.length} (응시 진행도: ${answeredCount}/${S.testQueue.length})</span>
         <span class="badge blue">${esc(q.category||'기본단원')}</span>
       </div>
@@ -1349,7 +1349,7 @@ function renderBankListItems(){
       <p><b>${esc(q.number||i+1)}. ${esc(q.text)}</b></p>
       <small>풀이 ${t.attempts}회 · 오답 ${t.wrong}회 · 정답률 ${t.attempts?Math.round(t.correct/t.attempts*100):0}% ${bookmarks.includes(q.id)?"· ⭐":""}</small>
       <div class="row" style="margin-top:10px">
-        <button class="secondary" onclick="openEdit('${esc(q.id)}')">✏️ 수정</button>
+        <button class="secondary" onclick="openEdit('${esc(q.id)}')">✏️️ 수정</button>
         <button class="danger" onclick="deleteQuestion('${esc(q.id)}')">🗑️ 삭제</button>
       </div>
     </div>`;
