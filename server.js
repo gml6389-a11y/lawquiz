@@ -17,7 +17,7 @@ const db = new sqlite3.Database('./lawquiz.db', (err) => {
 });
 
 db.serialize(() => {
-  // 문제 테이블
+  // 공용 문제 테이블
   db.run(`
     CREATE TABLE IF NOT EXISTS questions (
       id TEXT PRIMARY KEY,
@@ -36,74 +36,94 @@ db.serialize(() => {
     )
   `);
 
-  // 문제별 풀이 통계 및 메모
+  // 사용자 계정 테이블
   db.run(`
-    CREATE TABLE IF NOT EXISTS stats (
-      id TEXT PRIMARY KEY,
+    CREATE TABLE IF NOT EXISTS users (
+      username TEXT PRIMARY KEY,
+      password TEXT NOT NULL,
+      created_at TEXT
+    )
+  `);
+
+  // 사용자별 통계 및 메모
+  db.run(`
+    CREATE TABLE IF NOT EXISTS user_stats (
+      username TEXT,
+      question_id TEXT,
       attempts INTEGER DEFAULT 0,
       correct INTEGER DEFAULT 0,
       wrong INTEGER DEFAULT 0,
       last TEXT,
-      note TEXT DEFAULT ''
+      note TEXT DEFAULT '',
+      PRIMARY KEY (username, question_id)
     )
   `);
 
-  // 북마크
+  // 사용자별 북마크
   db.run(`
-    CREATE TABLE IF NOT EXISTS bookmarks (
-      id TEXT PRIMARY KEY
+    CREATE TABLE IF NOT EXISTS user_bookmarks (
+      username TEXT,
+      question_id TEXT,
+      PRIMARY KEY (username, question_id)
     )
   `);
 
-  // 시스템 설정 및 진행 상태
+  // 사용자별 설정
   db.run(`
-    CREATE TABLE IF NOT EXISTS app_state (
-      key TEXT PRIMARY KEY,
-      value TEXT
+    CREATE TABLE IF NOT EXISTS user_settings (
+      username TEXT PRIMARY KEY,
+      settings_json TEXT
     )
   `);
 });
 
-// 1. 전체 데이터 로드
+// 1. 공용 문제 데이터 및 사용자 데이터 로드
 app.get('/api/bootstrap', (req, res) => {
+  const username = req.query.username;
+
   db.all(`SELECT * FROM questions ORDER BY CAST(number AS INTEGER) ASC`, [], (err, qRows) => {
     if (err) return res.status(500).json({ error: err.message });
-    db.all(`SELECT * FROM stats`, [], (err, sRows) => {
-      if (err) return res.status(500).json({ error: err.message });
-      db.all(`SELECT id FROM bookmarks`, [], (err, bRows) => {
-        if (err) return res.status(500).json({ error: err.message });
-        db.all(`SELECT * FROM app_state`, [], (err, stateRows) => {
-          if (err) return res.status(500).json({ error: err.message });
 
-          const bank = qRows.map(r => ({
-            id: r.id,
-            number: r.number,
-            group: r.grp,
-            subject: r.subject,
-            categoryPath: r.categoryPath ? JSON.parse(r.categoryPath) : ["기본단원"],
-            category: r.category,
-            type: r.type,
-            text: r.text,
-            choices: r.choices ? JSON.parse(r.choices) : [],
-            answer: r.answer,
-            explanation: r.explanation,
-            incomplete: Boolean(r.incomplete),
-            sourcePages: r.sourcePages
-          }));
+    const bank = qRows.map(r => ({
+      id: r.id,
+      number: r.number,
+      group: r.grp,
+      subject: r.subject,
+      categoryPath: r.categoryPath ? JSON.parse(r.categoryPath) : ["기본단원"],
+      category: r.category,
+      type: r.type,
+      text: r.text,
+      choices: r.choices ? JSON.parse(r.choices) : [],
+      answer: r.answer,
+      explanation: r.explanation,
+      incomplete: Boolean(r.incomplete),
+      sourcePages: r.sourcePages
+    }));
+
+    // 비로그인 상태일 때는 빈 통계 반환
+    if (!username) {
+      return res.json({ bank, stats: {}, bookmarks: [], notes: {}, settings: { lastSubject: null, lastIndex: {}, lastId: {} } });
+    }
+
+    // 로그인된 사용자의 데이터 로드
+    db.all(`SELECT * FROM user_stats WHERE username = ?`, [username], (err, sRows) => {
+      if (err) return res.status(500).json({ error: err.message });
+      db.all(`SELECT question_id FROM user_bookmarks WHERE username = ?`, [username], (err, bRows) => {
+        if (err) return res.status(500).json({ error: err.message });
+        db.get(`SELECT settings_json FROM user_settings WHERE username = ?`, [username], (err, setRow) => {
+          if (err) return res.status(500).json({ error: err.message });
 
           const stats = {};
           const notes = {};
-          sRows.forEach(s => {
-            stats[s.id] = { attempts: s.attempts, correct: s.correct, wrong: s.wrong, last: s.last };
-            if (s.note) notes[s.id] = s.note;
+          (sRows || []).forEach(s => {
+            stats[s.question_id] = { attempts: s.attempts, correct: s.correct, wrong: s.wrong, last: s.last };
+            if (s.note) notes[s.question_id] = s.note;
           });
 
-          const bookmarks = bRows.map(b => b.id);
-          
+          const bookmarks = (bRows || []).map(b => b.question_id);
           let settings = { lastSubject: null, lastIndex: {}, lastId: {} };
-          const settingRow = stateRows.find(r => r.key === 'settings');
-          if (settingRow) {
-            try { settings = JSON.parse(settingRow.value); } catch(e) {}
+          if (setRow && setRow.settings_json) {
+            try { settings = JSON.parse(setRow.settings_json); } catch(e) {}
           }
 
           res.json({ bank, stats, bookmarks, notes, settings });
@@ -113,7 +133,30 @@ app.get('/api/bootstrap', (req, res) => {
   });
 });
 
-// 2. 단일 문제 저장/추가/수정
+// 2. 로그인 / 회원가입 (자동 등록)
+app.post('/api/auth/login', (req, res) => {
+  const { username, password } = req.body;
+  if (!username || !password) return res.status(400).json({ error: "이름과 비밀번호를 모두 입력하세요." });
+
+  db.get(`SELECT * FROM users WHERE username = ?`, [username], (err, row) => {
+    if (err) return res.status(500).json({ error: err.message });
+    if (!row) {
+      // 신규 계정 자동 생성
+      const now = new Date().toISOString();
+      db.run(`INSERT INTO users (username, password, created_at) VALUES (?, ?, ?)`, [username, password, now], (err) => {
+        if (err) return res.status(500).json({ error: err.message });
+        return res.json({ success: true, isNew: true, username });
+      });
+    } else {
+      if (row.password !== password) {
+        return res.status(401).json({ error: "비밀번호가 일치하지 않습니다." });
+      }
+      return res.json({ success: true, isNew: false, username });
+    }
+  });
+});
+
+// 3. 문제 등록/수정
 app.post('/api/question', (req, res) => {
   const q = req.body;
   const sql = `
@@ -141,75 +184,81 @@ app.post('/api/question', (req, res) => {
   });
 });
 
-// 3. 문제 삭제
+// 4. 문제 삭제
 app.delete('/api/question/:id', (req, res) => {
   const { id } = req.params;
   db.run(`DELETE FROM questions WHERE id = ?`, [id], (err) => {
     if (err) return res.status(500).json({ error: err.message });
-    db.run(`DELETE FROM stats WHERE id = ?`, [id]);
-    db.run(`DELETE FROM bookmarks WHERE id = ?`, [id]);
+    db.run(`DELETE FROM user_stats WHERE question_id = ?`, [id]);
+    db.run(`DELETE FROM user_bookmarks WHERE question_id = ?`, [id]);
     res.json({ success: true });
   });
 });
 
-// 4. 풀이 통계 및 학습기록 업데이트
+// 5. 풀이 통계 업데이트 (로그인 사용자 전용)
 app.post('/api/stats', (req, res) => {
-  const { id, isCorrect, settings } = req.body;
+  const { username, id, isCorrect, settings } = req.body;
+  if (!username) return res.json({ success: false, reason: "비로그인 상태" });
+
   const now = new Date().toISOString();
   const incC = isCorrect ? 1 : 0;
   const incW = isCorrect ? 0 : 1;
 
   const sql = `
-    INSERT INTO stats (id, attempts, correct, wrong, last)
-    VALUES (?, 1, ?, ?, ?)
-    ON CONFLICT(id) DO UPDATE SET
+    INSERT INTO user_stats (username, question_id, attempts, correct, wrong, last)
+    VALUES (?, ?, 1, ?, ?, ?)
+    ON CONFLICT(username, question_id) DO UPDATE SET
       attempts = attempts + 1,
       correct = correct + ?,
       wrong = wrong + ?,
       last = ?
   `;
-  db.run(sql, [id, incC, incW, now, incC, incW, now], (err) => {
+  db.run(sql, [username, id, incC, incW, now, incC, incW, now], (err) => {
     if (err) return res.status(500).json({ error: err.message });
     if (settings) {
       db.run(
-        `INSERT OR REPLACE INTO app_state (key, value) VALUES ('settings', ?)`,
-        [JSON.stringify(settings)]
+        `INSERT OR REPLACE INTO user_settings (username, settings_json) VALUES (?, ?)`,
+        [username, JSON.stringify(settings)]
       );
     }
     res.json({ success: true });
   });
 });
 
-// 5. 북마크 토글
+// 6. 북마크 토글
 app.post('/api/bookmark', (req, res) => {
-  const { id, isBookmarked } = req.body;
+  const { username, id, isBookmarked } = req.body;
+  if (!username) return res.json({ success: false, reason: "비로그인 상태" });
+
   if (isBookmarked) {
-    db.run(`INSERT OR IGNORE INTO bookmarks (id) VALUES (?)`, [id], (err) => {
+    db.run(`INSERT OR IGNORE INTO user_bookmarks (username, question_id) VALUES (?, ?)`, [username, id], (err) => {
       if (err) return res.status(500).json({ error: err.message });
       res.json({ success: true });
     });
   } else {
-    db.run(`DELETE FROM bookmarks WHERE id = ?`, [id], (err) => {
+    db.run(`DELETE FROM user_bookmarks WHERE username = ? AND question_id = ?`, [username, id], (err) => {
       if (err) return res.status(500).json({ error: err.message });
       res.json({ success: true });
     });
   }
 });
 
-// 6. 메모 업데이트
+// 7. 메모 저장
 app.post('/api/note', (req, res) => {
-  const { id, note } = req.body;
+  const { username, id, note } = req.body;
+  if (!username) return res.json({ success: false, reason: "비로그인 상태" });
+
   const sql = `
-    INSERT INTO stats (id, note) VALUES (?, ?)
-    ON CONFLICT(id) DO UPDATE SET note = ?
+    INSERT INTO user_stats (username, question_id, note) VALUES (?, ?, ?)
+    ON CONFLICT(username, question_id) DO UPDATE SET note = ?
   `;
-  db.run(sql, [id, note, note], (err) => {
+  db.run(sql, [username, id, note, note], (err) => {
     if (err) return res.status(500).json({ error: err.message });
     res.json({ success: true });
   });
 });
 
-// 7. JSON 일괄 병합/덮어쓰기
+// 8. JSON 일괄 병합/덮어쓰기
 app.post('/api/import', (req, res) => {
   const { questions, mode } = req.body;
   if (!Array.isArray(questions)) return res.status(400).json({ error: 'questions array required' });
@@ -217,8 +266,8 @@ app.post('/api/import', (req, res) => {
   db.serialize(() => {
     if (mode === 'replace') {
       db.run(`DELETE FROM questions`);
-      db.run(`DELETE FROM stats`);
-      db.run(`DELETE FROM bookmarks`);
+      db.run(`DELETE FROM user_stats`);
+      db.run(`DELETE FROM user_bookmarks`);
     }
 
     const stmt = db.prepare(`
@@ -251,12 +300,15 @@ app.post('/api/import', (req, res) => {
   });
 });
 
-// 8. 학습기록 리셋
+// 9. 사용자별 학습기록 리셋
 app.post('/api/reset-progress', (req, res) => {
+  const { username } = req.body;
+  if (!username) return res.status(400).json({ error: "로그인이 필요합니다." });
+
   db.serialize(() => {
-    db.run(`DELETE FROM stats`);
-    db.run(`DELETE FROM bookmarks`);
-    db.run(`DELETE FROM app_state WHERE key = 'settings'`);
+    db.run(`DELETE FROM user_stats WHERE username = ?`, [username]);
+    db.run(`DELETE FROM user_bookmarks WHERE username = ?`, [username]);
+    db.run(`DELETE FROM user_settings WHERE username = ?`, [username]);
     res.json({ success: true });
   });
 });
