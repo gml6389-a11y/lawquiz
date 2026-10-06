@@ -435,6 +435,55 @@ function home(){
   `;
 }
 
+// 데이터 내보내기/가져오기 함수 구현
+function exportMaster(){
+  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({
+    version: masterMeta.version,
+    bookTitle: masterMeta.bookTitle,
+    questions: bank
+  }, null, 2));
+  const dlAnchor = document.createElement('a');
+  dlAnchor.setAttribute("href", dataStr);
+  dlAnchor.setAttribute("download", `lawquiz_bank_${Date.now()}.json`);
+  dlAnchor.click();
+}
+
+function exportProgress(){
+  const progressData = {
+    user: currentUser,
+    stats,
+    bookmarks,
+    notes,
+    settings,
+    exportedAt: new Date().toISOString()
+  };
+  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(progressData, null, 2));
+  const dlAnchor = document.createElement('a');
+  dlAnchor.setAttribute("href", dataStr);
+  dlAnchor.setAttribute("download", `lawquiz_progress_${currentUser || 'guest'}_${Date.now()}.json`);
+  dlAnchor.click();
+}
+
+function restoreProgress(input){
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if(data.stats) stats = data.stats;
+      if(data.bookmarks) bookmarks = data.bookmarks;
+      if(data.notes) notes = data.notes;
+      if(data.settings) settings = data.settings;
+      alert("학습기록이 복원되었습니다.");
+      render();
+    } catch(err) {
+      alert("학습기록 복원 실패: " + err.message);
+    }
+  };
+  reader.readAsText(file);
+}
+
 function openSetup(g,s){
   let arr=bank.filter(q=>q.group===g&&q.subject===s);
   if(!arr.length){alert("이 과목에는 문제가 없습니다.");return}
@@ -1092,7 +1141,7 @@ function testPlayPage(){
     <section class="section">
       <div class="progress"><span style="width:${((S.testQi+1)/S.testQueue.length)*100}%"></span></div>
       
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-irr:12px 0 8px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin:12px 0 8px">
         <span class="meta"><b>문제 ${S.testQi+1}</b> / ${S.testQueue.length} (응시 진행도: ${answeredCount}/${S.testQueue.length})</span>
         <span class="badge blue">${esc(q.category||'기본단원')}</span>
       </div>
@@ -1239,7 +1288,7 @@ function testResultPage(){
       <!-- 1. 시간 지연 문항 랭킹 -->
       <div style="margin-top:24px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-          <b>⏱️ 소요시간 랭킹 (오래 걸린 순서)</b>
+          <b>⏱️️ 소요시간 랭킹 (오래 걸린 순서)</b>
           <span class="meta">가장 고민이 길었던 문제 분석</span>
         </div>
         ${res.timeRankList.map((item, r)=>`
@@ -1349,7 +1398,7 @@ function renderBankListItems(){
       <p><b>${esc(q.number||i+1)}. ${esc(q.text)}</b></p>
       <small>풀이 ${t.attempts}회 · 오답 ${t.wrong}회 · 정답률 ${t.attempts?Math.round(t.correct/t.attempts*100):0}% ${bookmarks.includes(q.id)?"· ⭐":""}</small>
       <div class="row" style="margin-top:10px">
-        <button class="secondary" onclick="openEdit('${esc(q.id)}')">✏️️ 수정</button>
+        <button class="secondary" onclick="openEdit('${esc(q.id)}')">✏ 수정</button>
         <button class="danger" onclick="deleteQuestion('${esc(q.id)}')">🗑️ 삭제</button>
       </div>
     </div>`;
@@ -1473,7 +1522,7 @@ function addQuestionModal(){
         <label>문제 본문</label>
         <textarea rows="3" placeholder="지문 입력" oninput="updateAddField('text',this.value)">${esc(d.text)}</textarea>
         ${d.type==='mcq'?`
-          <div style="display:flex;justify-content:space-between;align-items:center;margin:10px 0 4px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-10px 0 4px">
             <label style="margin:0">선지</label>
             <button class="badge btn" onclick="addDraftChoiceItem()">+ 선지 추가</button>
           </div>
