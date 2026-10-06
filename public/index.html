@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Law Quiz v5.9 · 서버 연동 문제은행</title>
+<title>Law Quiz v6.0 · 시험 모드 & 사용자 계정 지원</title>
 <style>
 *{box-sizing:border-box}
 body{margin:0;background:#f3f5f4;color:#17191c;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR",sans-serif}
@@ -39,7 +39,9 @@ button,input,textarea,select{font:inherit}button{cursor:pointer}
 .answer.sel{border:2px solid #173d2a;background:#f2f7f4}
 .result{margin-top:18px;padding:18px;border-radius:16px;background:#f5f8f6}.wrong{background:#fff7f7;border:1px solid #efd0d0}.correct{border:1px solid #cfe2d6}
 .explain{border-top:1px solid #e2e6e3;margin-top:14px;padding-top:14px;line-height:1.65;white-space:pre-wrap}.note{margin-top:14px}.note input{width:100%;margin-top:6px;border:1px solid #dfe4e1;border-radius:9px;padding:10px}
-.bottom{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(860px,100%);height:70px;background:#fff;border-top:1px solid #e5e8e6;display:grid;grid-template-columns:repeat(4,1fr);z-index:5}.bottom button{border:0;background:#fff;color:#555}.bottom small{display:block;margin-top:4px;font-size:10px}
+
+/* 하단 5탭 네비게이션 */
+.bottom{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(860px,100%);height:70px;background:#fff;border-top:1px solid #e5e8e6;display:grid;grid-template-columns:repeat(5,1fr);z-index:5}.bottom button{border:0;background:#fff;color:#555}.bottom small{display:block;margin-top:4px;font-size:10px}
 .meta{font-size:12px;color:#777;line-height:1.6}
 .kpi{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:12px}.kpi>div{background:#f7f8f7;border-radius:12px;padding:12px}.kpi b{display:block;font-size:18px}.kpi span{font-size:11px;color:#777}
 details{border:1px solid #e1e5e3;border-radius:12px;padding:10px 12px;margin-top:10px}summary{cursor:pointer;font-weight:700}
@@ -76,9 +78,11 @@ details{border:1px solid #e1e5e3;border-radius:12px;padding:10px 12px;margin-top
 .colItem.active{background:#173d2a;color:#fff;font-weight:bold}
 .colItem small{opacity:0.8;font-size:11px}
 
-/* 유효성 검사 에러 스타일 */
 .inputError{border:2px solid #d94848 !important;background:#fff8f8 !important}
 .errMsg{color:#c02b2b;font-size:11px;font-weight:700;margin-top:4px;display:block}
+
+/* 시험 결과 카드 */
+.testRankCard{background:#fbfcfa;border:1px solid #e1e5e3;border-radius:12px;padding:12px;margin-bottom:8px}
 </style>
 </head>
 <body><div id="app"></div>
@@ -89,7 +93,6 @@ const SUBJECTS={
   "민사법":["민법","민사소송법","가족법","상법"]
 };
 
-// 최초 접속 시 DB가 비어있어도 화면이 즉시 렌더링되도록 기본 샘플 문제 1개 내장
 const SAMPLE = [
   {
     id: "sample-1",
@@ -113,7 +116,10 @@ let stats = {};
 let settings = {lastSubject:null, lastIndex:{}, lastId:{}};
 let bookmarks = [];
 let notes = {};
-let masterMeta = {version:5, bookTitle:"LAW QUIZ 통합 문제은행", processing:{lastSourcePage:null,hasIncompleteQuestion:false,incompleteQuestionId:null}, warnings:[]};
+let masterMeta = {version:6, bookTitle:"LAW QUIZ 통합 문제은행", processing:{lastSourcePage:null,hasIncompleteQuestion:false,incompleteQuestionId:null}, warnings:[]};
+
+// 로그인 계정 관리 (로컬스토리지 보존)
+let currentUser = localStorage.getItem("law_quiz_user") || null;
 
 let S = {
   screen:"home", files:[], pendingQuestions:[], pendingMetaList:[], queue:[], qi:0, selected:[], submitted:false,
@@ -137,14 +143,37 @@ let S = {
   showBankFilterModal:false,
   showAddModal:false,
   addDraft:null,
-  addErrors:{}
+  addErrors:{},
+
+  // 테스트(모의고사) 모드 상태
+  testSubject: "헌법",
+  testGroup: "공법",
+  testPath: [],
+  testLimit: 20,
+  testMinutes: 30,
+  testQueue: [],
+  testQi: 0,
+  testAnswers: {},     // { qId: selectedTokens }
+  testTimeSpent: {},   // { qId: seconds }
+  testTimeLeft: 0,
+  testTimerInterval: null,
+  testCurrentEnterTime: 0,
+  testResultData: null,
+
+  // 계정 모달
+  showAuthModal: false,
+  authMode: "login",
+  authUsername: "",
+  authPassword: "",
+  authError: ""
 };
 let dirty = false;
 
-// 서버에서 초기 데이터 로드
+// 서버에서 데이터 로드 (계정별 분리)
 async function fetchBootstrap(){
   try {
-    const res = await fetch('/api/bootstrap');
+    const url = currentUser ? `/api/bootstrap?username=${encodeURIComponent(currentUser)}` : `/api/bootstrap`;
+    const res = await fetch(url);
     if (!res.ok) throw new Error("서버 응답 오류: " + res.status);
     const data = await res.json();
     if (Array.isArray(data.bank) && data.bank.length > 0) {
@@ -155,7 +184,7 @@ async function fetchBootstrap(){
     notes = data.notes || {};
     settings = data.settings || {lastSubject:null,lastIndex:{},lastId:{}};
   } catch(e) {
-    console.warn("서버 연결 대기 또는 오류:", e);
+    console.warn("서버 연결 대기 또는 로컬 오프라인 모드:", e);
   } finally {
     render();
   }
@@ -164,15 +193,87 @@ async function fetchBootstrap(){
 function esc(x){return String(x??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
 function st(id){return stats[id]||{attempts:0,correct:0,wrong:0,last:null}}
 function render(){
-  let fn={home,bankPage,importPage,quizPage,wrongPage,bookmarkPage,setupPage}[S.screen]||home;
+  let fn={home,bankPage,importPage,quizPage,wrongPage,bookmarkPage,setupPage,testSetupPage,testPlayPage,testResultPage}[S.screen]||home;
   document.getElementById("app").innerHTML='<div class="app">'+fn()+'</div>';
 }
 function go(s){
   stopTimer();
+  stopTestTimer();
   S.screen=s;
   render();
 }
 function topBar(t,b="home"){return `<header class="top"><button class="back" onclick="go('${b}')">←</button><b>${esc(t)}</b><span></span></header>`}
+
+// ---------------- 인증 & 계정 관리 ----------------
+function openAuthModal(){
+  S.authUsername = "";
+  S.authPassword = "";
+  S.authError = "";
+  S.showAuthModal = true;
+  render();
+}
+function closeAuthModal(){
+  S.showAuthModal = false;
+  render();
+}
+async function submitAuth(){
+  if(!S.authUsername.trim() || !S.authPassword.trim()){
+    S.authError = "이름과 비밀번호를 모두 입력하세요.";
+    render();
+    return;
+  }
+  try {
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: S.authUsername.trim(), password: S.authPassword.trim() })
+    });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || "인증 실패");
+
+    currentUser = data.username;
+    localStorage.setItem("law_quiz_user", currentUser);
+    alert(data.isNew ? `🎉 신규 사용자 [${currentUser}]님 환영합니다! 계정이 생성되었습니다.` : `👋 [${currentUser}]님 로그인되었습니다.`);
+    closeAuthModal();
+    await fetchBootstrap();
+  } catch(err){
+    S.authError = err.message;
+    render();
+  }
+}
+function logoutUser(){
+  if(!confirm("로그아웃 하시겠습니까?\n로그아웃 시 개인 학습기록 저장이 중단되고 게스트 모드로 전환됩니다.")) return;
+  currentUser = null;
+  localStorage.removeItem("law_quiz_user");
+  stats = {};
+  bookmarks = [];
+  notes = {};
+  alert("로그아웃되었습니다.");
+  fetchBootstrap();
+}
+
+function authModalView(){
+  return `<div class="modalOverlay" onclick="if(event.target===this)closeAuthModal()">
+    <div class="modalContent" style="max-width:400px">
+      <div class="modalHeader">
+        <b>👤 학습자 로그인 / 등록</b>
+        <button class="back" onclick="closeAuthModal()">✕</button>
+      </div>
+      <div class="modalBody reviewBox">
+        <p class="meta" style="margin-top:0">이름과 비밀번호를 입력하면 계정별로 오답·북마크·풀이 기록이 분리 보존됩니다. (최초 입력 시 자동 계정 생성)</p>
+        <label>사용자 이름 (아이디)</label>
+        <input placeholder="이름을 입력하세요" value="${esc(S.authUsername)}" oninput="S.authUsername=this.value">
+        <label>비밀번호</label>
+        <input type="password" placeholder="비밀번호" value="${esc(S.authPassword)}" oninput="S.authPassword=this.value">
+        ${S.authError ? `<span class="errMsg">⚠️ ${esc(S.authError)}</span>` : ''}
+      </div>
+      <div class="modalFooter">
+        <button class="secondary" style="flex:1" onclick="closeAuthModal()">취소</button>
+        <button class="primary" style="flex:2" onclick="submitAuth()">로그인 / 생성</button>
+      </div>
+    </div>
+  </div>`;
+}
 
 function extractCategoryPath(q, meta){
   if(Array.isArray(q.categoryPath) && q.categoryPath.length > 0){
@@ -184,11 +285,6 @@ function extractCategoryPath(q, meta){
   if(typeof q.category === "string" && q.category.trim()){
     return q.category.split(">").map(x=>x.trim()).filter(Boolean);
   }
-  if(q.source && Array.isArray(q.source.tocPath) && q.source.tocPath.length > 0){
-    return q.source.tocPath.filter(Boolean).map(x=>String(x).trim());
-  }
-  let fb = q.subcategory || q.subCategory || q.chapter || q.section || q.subSubject || meta?.category;
-  if(typeof fb === "string" && fb.trim()) return [fb.trim()];
   return ["기본단원"];
 }
 
@@ -290,10 +386,29 @@ function shuffleArray(arr) {
 function home(){
   let t=totals(), incomplete=bank.filter(q=>q.incomplete).length;
   return `<section class="hero">
-    <div class="brand">⚖️ LAW QUIZ · 서버 연동 v5.9</div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-start">
+      <div class="brand">⚖️ LAW QUIZ · v6.0</div>
+      <div>
+        ${currentUser ? `
+          <button class="badge btn" style="background:#fff;color:#173d2a;font-weight:bold" onclick="logoutUser()">👤 ${esc(currentUser)} (로그아웃)</button>
+        ` : `
+          <button class="badge btn warn" onclick="openAuthModal()">🔑 로그인 (기록 저장)</button>
+        `}
+      </div>
+    </div>
     <h1>나만의 법학<br>문제은행</h1>
-    <p>실전 타이머 모드 & 서버 영구 보존</p>
+    <p>실전 모의고사 테스트 & 개인별 학습 통계 영구 관리</p>
   </section>
+
+  ${!currentUser ? `
+    <section class="section">
+      <div class="notice warn">
+        ⚠️ <b>현재 게스트 모드입니다.</b> 이름과 비밀번호로 로그인하지 않으면 학습기록(정답률, 오답노트, 북마크)이 서버에 보존되지 않습니다.
+        <br><button class="primary" style="padding:6px 12px;font-size:12px;margin-top:6px" onclick="openAuthModal()">로그인하고 기록 저장하기</button>
+      </div>
+    </section>
+  ` : ''}
+
   <section class="section">
     <div class="stats">
       <div class="stat"><b>${bank.length}</b><span>문제은행</span></div>
@@ -301,8 +416,8 @@ function home(){
       <div class="stat"><b>${t.accuracy}%</b><span>누적 정답률</span></div>
     </div>
   </section>
-  ${incomplete?`<section class="section"><div class="notice warn">⚠️️ 아직 연결되지 않은 경계 문제가 ${incomplete}개 있습니다.</div></section>`:""}
-  <section class="title"><h1>과목 선택</h1><p>과목을 선택하여 세부 목차와 풀이량을 지정하세요.</p></section>
+  ${incomplete?`<section class="section"><div class="notice warn">⚠️ 아직 연결되지 않은 경계 문제가 ${incomplete}개 있습니다.</div></section>`:""}
+  <section class="title"><h1>과목 선택 (일반 학습)</h1><p>과목을 선택하여 해설을 즉시 확인하며 학습합니다.</p></section>
   <section class="section">
     ${(()=>{let map=subjectMap();return Object.keys(map).map(g=>`<div class="group"><b>${esc(g)}</b>${!SUBJECTS[g]?` <span class="badge warn">미등록 그룹</span>`:""}<div class="chips">${map[g].map(s=>{
       let p=progress(s);let known=SUBJECTS[g]&&SUBJECTS[g].includes(s);
@@ -315,9 +430,10 @@ function home(){
     <button class="secondary full" onclick="exportProgress()">💾 학습기록 백업</button>
     <button class="secondary full" onclick="document.getElementById('restore').click()">📂 학습기록 복원</button>
     <input id="restore" type="file" accept=".json,application/json" class="hidden" onchange="restoreProgress(this)">
-    <button class="danger full" onclick="resetProgress()">🗑️️ 학습기록 초기화 (리셋)</button>
+    <button class="danger full" onclick="resetProgress()">🗑️ 현재 계정 학습기록 초기화</button>
   </section>
   ${bottom()}
+  ${S.showAuthModal ? authModalView() : ''}
   `;
 }
 
@@ -352,19 +468,21 @@ function isPathEqual(p1, p2){
   return p1.every((v,i)=>v===p2[i]);
 }
 
-function renderTocTree(tree){
+function renderTocTree(tree, targetState = "setup"){
   let topKeys = Object.keys(tree);
   if(!topKeys.length) return `<div class="meta">등록된 목차가 없습니다.</div>`;
 
+  const curPath = targetState === "test" ? S.testPath : S.setupPath;
+
   return topKeys.map(k1=>{
     let node1 = tree[k1];
-    let isNode1Sel = isPathEqual(S.setupPath, node1.path);
+    let isNode1Sel = isPathEqual(curPath, node1.path);
     let subKeys = Object.keys(node1.children);
 
     return `<div class="tocBox">
       <div class="tocBoxHeader">
         <b style="font-size:15px">📁 ${esc(node1.name)} <small style="color:#777">(${node1.count})</small></b>
-        <button class="badge btn ${isNode1Sel?'blue':''}" onclick="S.setupPath=${JSON.stringify(node1.path).replace(/"/g,"'")};render()">
+        <button class="badge btn ${isNode1Sel?'blue':''}" onclick="${targetState==='test'?'S.testPath':'S.setupPath'}=${JSON.stringify(node1.path).replace(/"/g,"'")};render()">
           ${isNode1Sel ? "✓ 선택됨" : "중단원 전체 풀기"}
         </button>
       </div>
@@ -372,25 +490,25 @@ function renderTocTree(tree){
         <div class="chips">
           ${subKeys.map(k2=>{
             let node2 = node1.children[k2];
-            let isNode2Sel = isPathEqual(S.setupPath, node2.path);
+            let isNode2Sel = isPathEqual(curPath, node2.path);
             let subSubKeys = Object.keys(node2.children);
 
             if(subSubKeys.length > 0){
               return `<div class="tocSubBox" style="width:100%">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
                   <span style="font-size:13px;font-weight:700">${esc(node2.name)} (${node2.count})</span>
-                  <button class="badge btn ${isNode2Sel?'blue':''}" onclick="S.setupPath=${JSON.stringify(node2.path).replace(/"/g,"'")};render()">${isNode2Sel ? "✓ 선택됨" : "전체"}</button>
+                  <button class="badge btn ${isNode2Sel?'blue':''}" onclick="${targetState==='test'?'S.testPath':'S.setupPath'}=${JSON.stringify(node2.path).replace(/"/g,"'")};render()">${isNode2Sel ? "✓ 선택됨" : "전체"}</button>
                 </div>
                 <div class="chips">
                   ${subSubKeys.map(k3=>{
                     let node3 = node2.children[k3];
-                    let isNode3Sel = isPathEqual(S.setupPath, node3.path);
-                    return `<button class="${isNode3Sel?'active':''}" onclick="S.setupPath=${JSON.stringify(node3.path).replace(/"/g,"'")};render()">${esc(node3.name)} <small>(${node3.count})</small></button>`;
+                    let isNode3Sel = isPathEqual(curPath, node3.path);
+                    return `<button class="${isNode3Sel?'active':''}" onclick="${targetState==='test'?'S.testPath':'S.setupPath'}=${JSON.stringify(node3.path).replace(/"/g,"'")};render()">${esc(node3.name)} <small>(${node3.count})</small></button>`;
                   }).join("")}
                 </div>
               </div>`;
             } else {
-              return `<button class="${isNode2Sel?'active':''}" onclick="S.setupPath=${JSON.stringify(node2.path).replace(/"/g,"'")};render()">${esc(node2.name)} <small>(${node2.count})</small></button>`;
+              return `<button class="${isNode2Sel?'active':''}" onclick="${targetState==='test'?'S.testPath':'S.setupPath'}=${JSON.stringify(node2.path).replace(/"/g,"'")};render()">${esc(node2.name)} <small>(${node2.count})</small></button>`;
             }
           }).join("")}
         </div>
@@ -444,7 +562,7 @@ function setupPage(){
           <b>단원 목차 선택</b>
           <button class="badge btn ${!S.setupPath.length?'blue':''}" onclick="S.setupPath=[];render()">전체 단원 (${allArr.length})</button>
         </div>
-        ${renderTocTree(tree)}
+        ${renderTocTree(tree, 'setup')}
       </div>
     `:""}
 
@@ -477,11 +595,6 @@ function setupPage(){
           <div class="rangeWrap" style="margin:10px 0 6px">
             <input type="range" min="20" max="60" step="5" value="${S.setupTimerSeconds}" oninput="S.setupTimerSeconds=parseInt(this.value,10);render()">
           </div>
-          <div style="display:flex;justify-content:space-between;font-size:11px;color:#888">
-            <span>20초 (스피드)</span>
-            <span>40초 (적정)</span>
-            <span>60초 (1분/실전)</span>
-          </div>
         </div>
       `:''}
     </div>
@@ -499,12 +612,6 @@ function setupPage(){
         <span>출제 예정 문제</span>
         <b style="font-size:20px;color:#173d2a">${actualCount} 문제</b>
       </div>
-      <p class="meta" style="margin-top:6px">
-        ${S.setupMode==="resume"?`[이어풀기] ${resumePos}번부터 최대 ${S.setupLimit==="all"?"전체":S.setupLimit+"문제"}`:
-        `[${esc(pathText)}] ${filteredList.length}문제 중 ${actualCount}문제 세트`}
-        · <b>${S.setupOrder==='random'?'🎲 무작위':'🔢 순차'}</b>
-        · <b>${S.setupTimerEnabled?`⏳ 문제당 ${S.setupTimerSeconds}초`:'⏱️ 무제한'}</b>
-      </p>
     </div>
 
     <button class="primary full" style="padding:16px;font-size:16px" onclick="startCustomQuiz()">🚀 문제 풀이 시작</button>
@@ -754,11 +861,13 @@ async function submitQ(isTimeout = false){
   let globalIdx=fullArr.findIndex(item=>item.id===q.id);
   if(globalIdx>=0) settings.lastIndex[S.subject]=globalIdx;
   
-  fetch('/api/stats', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ id: q.id, isCorrect: c, settings })
-  });
+  if(currentUser){
+    fetch('/api/stats', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: currentUser, id: q.id, isCorrect: c, settings })
+    });
+  }
 
   S.submitted=true;
   if(!c && !S.retrying && !isTimeout) S.retryPrompt=true;
@@ -792,26 +901,38 @@ function nextQ(){
 function toggleBook(id){
   let willBook = !bookmarks.includes(id);
   bookmarks = willBook ? [...bookmarks, id] : bookmarks.filter(x=>x!==id);
-  fetch('/api/bookmark', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ id, isBookmarked: willBook })
-  });
+  if(currentUser){
+    fetch('/api/bookmark', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: currentUser, id, isBookmarked: willBook })
+    });
+  }
   render();
 }
 
 function setNote(id,v){
   notes[id]=v;
-  fetch('/api/note', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ id, note: v })
-  });
+  if(currentUser){
+    fetch('/api/note', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: currentUser, id, note: v })
+    });
+  }
 }
 
 async function resetProgress(){
-  if(!confirm("모든 학습기록(풀이 횟수, 정답률, 이어풀기 위치, 북마크, 메모)을 초기화하시겠습니까?\n\n※ 등록된 문제 데이터는 삭제되지 않습니다.")) return;
-  await fetch('/api/reset-progress', { method: 'POST' });
+  if(!currentUser){
+    alert("로그인된 사용자가 아닙니다.");
+    return;
+  }
+  if(!confirm(`[${currentUser}]님의 모든 학습기록을 초기화하시겠습니까?\n등록된 문제 데이터는 삭제되지 않습니다.`)) return;
+  await fetch('/api/reset-progress', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username: currentUser })
+  });
   stats = {};
   settings = {lastSubject:null, lastIndex:{}, lastId:{}};
   bookmarks = [];
@@ -820,7 +941,378 @@ async function resetProgress(){
   render();
 }
 
-// ---------------- 문제은행 필터 & 3단 목차 탐색기 ----------------
+// =========================================================================
+// 📝 1. 테스트(모의고사) 모드 전체 로직
+// =========================================================================
+
+function testSetupPage(){
+  let sMap = subjectMap();
+  let allSubjects = Object.values(sMap).flat();
+  let tree = buildTocTree(S.testGroup, S.testSubject);
+  let totalInSubject = bank.filter(q=>q.subject===S.testSubject).length;
+  let pathText = S.testPath.length ? S.testPath.join(" > ") : "과목 전체";
+
+  return topBar("모의고사 테스트 설정", "home") + `
+    <section class="title">
+      <h1>📝 실전 모의고사</h1>
+      <p>해설 없이 전체 문제를 푼 뒤 최종 채점 및 소요시간 리포트를 확인합니다.</p>
+    </section>
+
+    <section class="section">
+      <b>1. 과목 및 단원 선택</b>
+      <div class="chips" style="margin-top:8px;margin-bottom:14px">
+        ${allSubjects.map(sub=>`
+          <button class="${S.testSubject===sub?'active':''}" onclick="onSelectTestSubject('${esc(sub)}')">${esc(sub)}</button>
+        `).join('')}
+      </div>
+
+      <details ${S.testPath.length?'open':''}>
+        <summary>📑 세부 단원 선택 (현재: <b>${esc(pathText)}</b>)</summary>
+        <div style="margin-top:10px">
+          <button class="badge btn ${!S.testPath.length?'blue':''}" style="margin-bottom:10px" onclick="S.testPath=[];render()">전체 단원 (${totalInSubject})</button>
+          ${renderTocTree(tree, 'test')}
+        </div>
+      </details>
+
+      <div style="margin-top:22px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <b>2. 문제 수 (최대 150문제 · 10단위)</b>
+          <b style="color:#173d2a;font-size:18px">${S.testLimit}문제</b>
+        </div>
+        <div class="chips">
+          ${[10, 20, 30, 40, 50, 70, 100, 150].map(cnt=>`
+            <button class="${S.testLimit===cnt?'active':''}" onclick="S.testLimit=${cnt};render()">${cnt}문제</button>
+          `).join('')}
+        </div>
+        <div class="rangeWrap">
+          <input type="range" min="10" max="150" step="10" value="${S.testLimit}" oninput="S.testLimit=parseInt(this.value,10);render()">
+        </div>
+      </div>
+
+      <div style="margin-top:20px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <b>3. 시험 제한 시간 (최대 60분 · 5분단위)</b>
+          <b style="color:#c02b2b;font-size:18px">${S.testMinutes}분</b>
+        </div>
+        <div class="chips">
+          ${[10, 20, 30, 40, 50, 60].map(m=>`
+            <button class="${S.testMinutes===m?'active':''}" onclick="S.testMinutes=${m};render()">${m}분</button>
+          `).join('')}
+        </div>
+        <div class="rangeWrap">
+          <input type="range" min="5" max="60" step="5" value="${S.testMinutes}" oninput="S.testMinutes=parseInt(this.value,10);render()">
+        </div>
+      </div>
+
+      <button class="primary full" style="padding:16px;font-size:16px;margin-top:24px" onclick="startTestExam()">
+        🚀 모의고사 시험 시작 (${S.testLimit}문제 / ${S.testMinutes}분)
+      </button>
+    </section>
+    ${bottom()}
+  `;
+}
+
+function onSelectTestSubject(sub){
+  S.testSubject = sub;
+  for(let g in SUBJECTS){
+    if(SUBJECTS[g].includes(sub)){
+      S.testGroup = g;
+      break;
+    }
+  }
+  S.testPath = [];
+  render();
+}
+
+function startTestExam(){
+  let list = bank.filter(q=>q.subject === S.testSubject && matchesPath(q, S.testPath));
+  if(!list.length){
+    alert("선택하신 조건에 해당하는 문제가 없습니다.");
+    return;
+  }
+
+  // 실전 테스트는 무작위 출제
+  let shuffled = shuffleArray(list);
+  S.testQueue = shuffled.slice(0, Math.min(S.testLimit, shuffled.length));
+  S.testQi = 0;
+  S.testAnswers = {};
+  S.testTimeSpent = {};
+  S.testTimeLeft = S.testMinutes * 60;
+  S.testCurrentEnterTime = Date.now();
+  S.testResultData = null;
+
+  S.screen = "testPlayPage";
+  render();
+  startTestTimer();
+}
+
+function stopTestTimer(){
+  if(S.testTimerInterval){
+    clearInterval(S.testTimerInterval);
+    S.testTimerInterval = null;
+  }
+}
+
+function startTestTimer(){
+  stopTestTimer();
+  S.testTimerInterval = setInterval(()=>{
+    S.testTimeLeft--;
+    let el = document.getElementById("testTimerDisp");
+    if(el){
+      let m = Math.floor(S.testTimeLeft / 60);
+      let s = S.testTimeLeft % 60;
+      el.innerText = `${m}분 ${s < 10 ? '0' : ''}${s}초`;
+    }
+    if(S.testTimeLeft <= 0){
+      stopTestTimer();
+      alert("⏰ 시험 시간이 종료되었습니다! 자동 채점됩니다.");
+      finishTestExam();
+    }
+  }, 1000);
+}
+
+function recordCurrentQuestionTime(){
+  if(!S.testQueue || !S.testQueue[S.testQi]) return;
+  let qId = S.testQueue[S.testQi].id;
+  let elapsed = Math.round((Date.now() - S.testCurrentEnterTime) / 1000);
+  S.testTimeSpent[qId] = (S.testTimeSpent[qId] || 0) + Math.max(1, elapsed);
+  S.testCurrentEnterTime = Date.now();
+}
+
+function testPlayPage(){
+  let q = S.testQueue[S.testQi];
+  let curAns = S.testAnswers[q.id] || [];
+  let isBinary = (q.type === "ox" || (q.choices && q.choices.length <= 2));
+  let m = Math.floor(S.testTimeLeft / 60);
+  let s = S.testTimeLeft % 60;
+  let answeredCount = Object.keys(S.testAnswers).length;
+
+  return `
+    <header class="top">
+      <b style="font-size:15px;color:#173d2a">📝 실전 테스트 (${esc(q.subject)})</b>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span id="testTimerDisp" class="timerText" style="font-size:15px">⏳ ${m}분 ${s<10?'0':''}${s}초</span>
+        <button class="badge btn red" onclick="if(confirm('시험을 종료하고 지금 바로 채점하시겠습니까?'))finishTestExam()">답안 제출</button>
+      </div>
+    </header>
+
+    <section class="section">
+      <div class="progress"><span style="width:${((S.testQi+1)/S.testQueue.length)*100}%"></span></div>
+      
+      <div style="display:flex;justify-content:space-between;align-items:center;margin:12px 0 8px">
+        <span class="meta"><b>문제 ${S.testQi+1}</b> / ${S.testQueue.length} (응시 진행도: ${answeredCount}/${S.testQueue.length})</span>
+        <span class="badge blue">${esc(q.category||'기본단원')}</span>
+      </div>
+
+      <div class="qtext">${esc(q.text)}</div>
+
+      <div class="answers">
+        ${q.type === 'ox'
+          ? ["O","X"].map(a=>{
+            let isSel = curAns.includes(a);
+            return `<button class="answer ${isSel?'sel':''}" onclick="chooseTestAnswer('${a}')" style="text-align:center;font-size:18px;font-weight:bold">${a}</button>`;
+          }).join('')
+          : q.choices.map((c, i)=>{
+            let numStr = String(i+1);
+            let isSel = curAns.includes(numStr);
+            return `<button class="answer ${isSel?'sel':''}" onclick="chooseTestAnswer('${numStr}')">
+              <div style="display:flex;align-items:flex-start;gap:10px">
+                <span class="badge ${isSel?'blue':'gray'}" style="min-width:26px;text-align:center">${numStr}</span>
+                <span style="flex:1">${esc(c)}</span>
+              </div>
+            </button>`;
+          }).join('')
+        }
+      </div>
+
+      <div class="row" style="margin-top:20px">
+        <button class="secondary" onclick="moveTestQ(-1)" ${S.testQi===0?'disabled':''}>← 이전 문제</button>
+        <button class="primary" onclick="moveTestQ(1)">
+          ${S.testQi === S.testQueue.length - 1 ? '전체 답안 최종 제출 →' : '다음 문제 →'}
+        </button>
+      </div>
+    </section>
+  `;
+}
+
+function chooseTestAnswer(a){
+  let q = S.testQueue[S.testQi];
+  let isBinary = (q.type === "ox" || (q.choices && q.choices.length <= 2));
+  let cur = S.testAnswers[q.id] || [];
+
+  if(isBinary){
+    S.testAnswers[q.id] = [String(a)];
+  } else {
+    let str = String(a);
+    let idx = cur.indexOf(str);
+    if(idx >= 0) cur.splice(idx, 1);
+    else cur.push(str);
+    cur.sort((x,y)=>parseInt(x,10)-parseInt(y,10));
+    S.testAnswers[q.id] = cur;
+  }
+  render();
+}
+
+function moveTestQ(delta){
+  recordCurrentQuestionTime();
+  if(delta === 1 && S.testQi === S.testQueue.length - 1){
+    if(confirm("마지막 문제입니다. 시험을 종료하고 최종 채점 리포트를 확인하시겠습니까?")){
+      finishTestExam();
+      return;
+    }
+  }
+  S.testQi = Math.max(0, Math.min(S.testQueue.length - 1, S.testQi + delta));
+  render();
+}
+
+function finishTestExam(){
+  recordCurrentQuestionTime();
+  stopTestTimer();
+
+  let correctList = [];
+  let wrongList = [];
+  let timeRankList = [];
+
+  S.testQueue.forEach((q, idx)=>{
+    let userAns = S.testAnswers[q.id] || [];
+    let isCorr = checkAnswerCorrect(userAns, q.answer);
+    let spent = S.testTimeSpent[q.id] || 0;
+
+    let item = {
+      q,
+      idx: idx + 1,
+      userAns,
+      isCorr,
+      spent
+    };
+
+    if(isCorr) correctList.push(item);
+    else wrongList.push(item);
+
+    timeRankList.push(item);
+
+    // 로그인된 사용자의 경우 개인 풀이 통계에도 자동 누적 반영
+    let x = st(q.id);
+    x.attempts++;
+    x.last = new Date().toISOString();
+    if(isCorr) x.correct++;
+    else x.wrong++;
+    stats[q.id] = x;
+
+    if(currentUser){
+      fetch('/api/stats', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: currentUser, id: q.id, isCorrect: isCorr })
+      });
+    }
+  });
+
+  // 소요 시간 오래 걸린 순 정렬 (내림차순)
+  timeRankList.sort((a,b)=> b.spent - a.spent);
+
+  let totalSpentSec = (S.testMinutes * 60) - Math.max(0, S.testTimeLeft);
+
+  S.testResultData = {
+    total: S.testQueue.length,
+    correctList,
+    wrongList,
+    timeRankList,
+    totalSpentSec,
+    score: Math.round((correctList.length / S.testQueue.length) * 100)
+  };
+
+  S.screen = "testResultPage";
+  render();
+}
+
+function testResultPage(){
+  let res = S.testResultData;
+  if(!res) return home();
+
+  let spentMin = Math.floor(res.totalSpentSec / 60);
+  let spentSec = res.totalSpentSec % 60;
+
+  return topBar("시험 결과 리포트", "testSetupPage") + `
+    <section class="title">
+      <h1>📊 모의고사 채점 결과</h1>
+      <p>총 풀이 시간: ${spentMin}분 ${spentSec}초 · ${currentUser ? `[${esc(currentUser)}] 기록 반영됨` : '게스트 모드'}</p>
+    </section>
+
+    <section class="section">
+      <div class="stats">
+        <div class="stat"><b style="color:#173d2a">${res.score}점</b><span>최종 득점</span></div>
+        <div class="stat"><b style="color:#245c35">${res.correctList.length}개</b><span>정답 문항</span></div>
+        <div class="stat"><b style="color:#c02b2b">${res.wrongList.length}개</b><span>오답 문항</span></div>
+      </div>
+
+      <!-- 1. 시간 지연 문항 랭킹 -->
+      <div style="margin-top:24px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <b>⏱️ 소요시간 랭킹 (오래 걸린 순서)</b>
+          <span class="meta">가장 고민이 길었던 문제 분석</span>
+        </div>
+        ${res.timeRankList.map((item, r)=>`
+          <div class="testRankCard">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+              <div>
+                <span class="badge ${item.isCorr?'good':'red'}">${item.isCorr?'✅ 정답':'❌ 오답'}</span>
+                <b style="font-size:13px;margin-left:4px">${r+1}위 · ${item.idx}번 문제</b>
+              </div>
+              <b style="color:#c02b2b;font-size:14px">⏱️ ${item.spent}초 소요</b>
+            </div>
+            <p style="margin:4px 0;font-size:13px;line-height:1.4"><b>${esc(item.q.text)}</b></p>
+            <small style="color:#666">제출: ${esc(item.userAns.join(', ') \vert{}\vert{} '미선택')} \vert{} 정답: ${esc(item.q.answer)}</small>
+          </div>
+        `).join('')}
+      </div>
+
+      <!-- 2. 오답 목록 -->
+      <div style="margin-top:24px">
+        <b>❌ 오답 문제 목록 (${res.wrongList.length}개)</b>
+        ${!res.wrongList.length ? `<div class="notice good" style="margin-top:8px">🎉 틀린 문제가 없습니다! 만점입니다.</div>` :
+          res.wrongList.map(item=>`
+            <details class="testRankCard" style="margin-top:8px">
+              <summary>
+                <b>${item.idx}번. ${esc(item.q.text.slice(0,35))}...</b>
+                <span class="badge red" style="float:right">오답 (${item.spent}초)</span>
+              </summary>
+              <div style="margin-top:10px;font-size:13px;line-height:1.5">
+                <p><b>문제 전체:</b><br>${esc(item.q.text)}</p>
+                <p style="color:#c02b2b"><b>내가 제출한 답:</b> ${esc(item.userAns.join(', ') || '미선택')}</p>
+                <p style="color:#173d2a"><b>실제 정답:</b> ${esc(item.q.answer)}</p>
+                <div class="explain" style="margin-top:6px;padding-top:6px"><b>해설:</b><br>${esc(item.q.explanation || '해설 없음')}</div>
+              </div>
+            </details>
+          `).join('')
+        }
+      </div>
+
+      <!-- 3. 맞은 문제 목록 -->
+      <div style="margin-top:24px">
+        <b>✅ 맞은 문제 목록 (${res.correctList.length}개)</b>
+        ${res.correctList.map(item=>`
+          <details class="testRankCard" style="margin-top:8px">
+            <summary>
+              <b>${item.idx}번. ${esc(item.q.text.slice(0,35))}...</b>
+              <span class="badge good" style="float:right">정답 (${item.spent}초)</span>
+            </summary>
+            <div style="margin-top:10px;font-size:13px;line-height:1.5">
+              <p><b>문제:</b><br>${esc(item.q.text)}</p>
+              <p style="color:#173d2a"><b>정답:</b> ${esc(item.q.answer)}</p>
+              <div class="explain" style="margin-top:6px;padding-top:6px"><b>해설:</b><br>${esc(item.q.explanation || '해설 없음')}</div>
+            </div>
+          </details>
+        `).join('')}
+      </div>
+
+      <button class="primary full" style="margin-top:24px;padding:16px" onclick="go('testSetupPage')">🔄 다른 모의고사 응시하기</button>
+    </section>
+    ${bottom()}
+  `;
+}
+
+// ---------------- 문제은행 & 관리자 UI ----------------
 function getFilteredBankQuestions(){
   let qList = bank.filter(q=>{
     if(S.search){
@@ -833,14 +1325,6 @@ function getFilteredBankQuestions(){
     if(S.bankFilter.major && S.bankFilter.major !== "전체"){
       let qMaj = q.categoryPath?.[0] || "기본단원";
       if(qMaj !== S.bankFilter.major) return false;
-    }
-    if(S.bankFilter.minor && S.bankFilter.minor !== "전체"){
-      let qMin = q.categoryPath?.[1] || "";
-      if(qMin !== S.bankFilter.minor) return false;
-    }
-    if(S.bankFilter.detail && S.bankFilter.detail !== "전체"){
-      let qDet = q.categoryPath?.[2] || "";
-      if(qDet !== S.bankFilter.detail) return false;
     }
     if(S.bankFilter.sort === "unsolved" && st(q.id).attempts > 0) return false;
     if(S.bankFilter.sort === "bookmark" && !bookmarks.includes(q.id)) return false;
@@ -871,8 +1355,6 @@ function renderBankListItems(){
       <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:6px">
         <span class="badge">${esc(q.group)} · ${esc(q.subject)}</span>
         <span class="badge blue">${esc(q.category||"기본단원")}</span>
-        ${q.incomplete?` <span class="badge warn">경계 미완성</span>`:""}
-        ${q.issues&&q.issues.length?` <span class="badge red">데이터 오류</span>`:""}
       </div>
       <p><b>${esc(q.number||i+1)}. ${esc(q.text)}</b></p>
       <small>풀이 ${t.attempts}회 · 오답 ${t.wrong}회 · 정답률 ${t.attempts?Math.round(t.correct/t.attempts*100):0}% ${bookmarks.includes(q.id)?"· ⭐":""}</small>
@@ -897,8 +1379,6 @@ function onBankSearchInput(val){
 
 function bankPage(){
   let filtered = getFilteredBankQuestions();
-  let hasFilter = (S.bankFilter.subject !== '전체') || (S.bankFilter.major !== '전체') || (S.bankFilter.sort !== 'default');
-
   return topBar("문제은행")+`
   <section class="title" style="display:flex;justify-content:space-between;align-items:flex-end">
     <div>
@@ -912,220 +1392,16 @@ function bankPage(){
   <section class="section">
     <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px">
       <input id="bankSearchInput" class="search" style="margin-bottom:0;flex:1" placeholder="문제 내용/과목/단원 검색..." value="${esc(S.search)}" oninput="onBankSearchInput(this.value)">
-      <button class="badge btn ${hasFilter?'blue':'gray'}" style="padding:11px 14px;font-size:13px;border-radius:11px;white-space:nowrap;height:42px" onclick="openBankFilterModal()">
-        ⚙️ 필터/목차 ${hasFilter ? '✓' : ''}
-      </button>
     </div>
-    
-    ${hasFilter?`
-      <div style="display:flex;gap:6px;align-items:center;margin-bottom:12px;flex-wrap:wrap">
-        <span class="meta">적용 필터:</span>
-        ${S.bankFilter.sort!=='default'?`<span class="badge blue">${getSortName(S.bankFilter.sort)}</span>`:''}
-        ${S.bankFilter.subject!=='전체'?`<span class="badge">${esc(S.bankFilter.subject)}</span>`:''}
-        ${S.bankFilter.major!=='전체'?`<span class="badge blue">${esc(S.bankFilter.major)}</span>`:''}
-        ${S.bankFilter.minor!=='전체'?`<span class="badge blue">${esc(S.bankFilter.minor)}</span>`:''}
-        ${S.bankFilter.detail!=='전체'?`<span class="badge blue">${esc(S.bankFilter.detail)}</span>`:''}
-        <button class="badge btn gray" onclick="clearBankFilters()">✕ 초기화</button>
-      </div>
-    `:''}
-
     <div id="bankListContainer">
       ${renderBankListItems()}
     </div>
   </section>
-  ${S.showBankFilterModal ? bankFilterModal() : ''}
+  ${bottom()}
   ${S.showAddModal ? addQuestionModal() : ''}
   `;
 }
 
-function getSortName(s){
-  return {
-    wrong:"오답 많은 순",
-    rate_asc:"정답률 낮은 순",
-    unsolved:"미풀이 문제만",
-    bookmark:"북마크만"
-  }[s]||"기본순";
-}
-
-function openBankFilterModal(){S.showBankFilterModal = true;render()}
-function closeBankFilterModal(){S.showBankFilterModal = false;render()}
-function clearBankFilters(){
-  S.bankFilter = {sort:"default", subject:"전체", major:"전체", minor:"전체", detail:"전체"};
-  S.search = "";
-  render();
-}
-
-function setFilterSubject(sub){
-  S.bankFilter.subject = sub;
-  S.bankFilter.major = "전체";
-  S.bankFilter.minor = "전체";
-  S.bankFilter.detail = "전체";
-  render();
-}
-
-function setFilterMajor(maj){
-  S.bankFilter.major = maj;
-  S.bankFilter.minor = "전체";
-  S.bankFilter.detail = "전체";
-  render();
-}
-
-function setFilterMinor(min){
-  S.bankFilter.minor = min;
-  S.bankFilter.detail = "전체";
-  render();
-}
-
-function setFilterDetail(det){
-  S.bankFilter.detail = det;
-  render();
-}
-
-function bankFilterModal(){
-  let sMap = subjectMap();
-  let allSubjects = Object.values(sMap).flat();
-
-  let isSubjectSelected = S.bankFilter.subject && S.bankFilter.subject !== "전체";
-  let subjQuestions = isSubjectSelected ? bank.filter(q=>q.subject === S.bankFilter.subject) : [];
-
-  let majorMap = {};
-  if(isSubjectSelected){
-    subjQuestions.forEach(q=>{
-      let m = q.categoryPath?.[0] || "기본단원";
-      majorMap[m] = (majorMap[m]||0) + 1;
-    });
-  }
-  let majorList = Object.keys(majorMap).map(k=>({name:k, count:majorMap[k]}));
-
-  let minorMap = {};
-  let isMajorSelected = isSubjectSelected && S.bankFilter.major && S.bankFilter.major !== "전체";
-  if(isMajorSelected){
-    subjQuestions.filter(q=>(q.categoryPath?.[0]||"기본단원")===S.bankFilter.major).forEach(q=>{
-      let min = q.categoryPath?.[1];
-      if(min) minorMap[min] = (minorMap[min]||0) + 1;
-    });
-  }
-  let minorList = Object.keys(minorMap).map(k=>({name:k, count:minorMap[k]}));
-
-  let detailMap = {};
-  let isMinorSelected = isMajorSelected && S.bankFilter.minor && S.bankFilter.minor !== "전체";
-  if(isMinorSelected){
-    subjQuestions.filter(q=>(q.categoryPath?.[0]||"기본단원")===S.bankFilter.major && q.categoryPath?.[1]===S.bankFilter.minor).forEach(q=>{
-      let det = q.categoryPath?.[2];
-      if(det) detailMap[det] = (detailMap[det]||0) + 1;
-    });
-  }
-  let detailList = Object.keys(detailMap).map(k=>({name:k, count:detailMap[k]}));
-
-  let pathItems = [];
-  if(isSubjectSelected) pathItems.push(S.bankFilter.subject);
-  if(isMajorSelected) pathItems.push(S.bankFilter.major);
-  if(isMinorSelected) pathItems.push(S.bankFilter.minor);
-  if(S.bankFilter.detail && S.bankFilter.detail !== "전체") pathItems.push(S.bankFilter.detail);
-  let currentPathText = pathItems.length ? pathItems.join(" > ") : "과목 전체";
-  let previewCount = getFilteredBankQuestions().length;
-
-  return `<div class="modalOverlay" onclick="if(event.target===this)closeBankFilterModal()">
-    <div class="modalContent">
-      <div class="modalHeader">
-        <b style="font-size:17px">⚙️ 문제 정렬 & 3단 목차 필터</b>
-        <button class="back" onclick="closeBankFilterModal()">✕</button>
-      </div>
-      <div class="modalBody">
-        <b>1. 정렬 및 풀이 조건</b>
-        <div class="chips" style="margin-bottom:16px">
-          ${[
-            ['default','기본 번호순'],
-            ['wrong','오답 많은 순'],
-            ['rate_asc','정답률 낮은 순'],
-            ['unsolved','미풀이 문제만'],
-            ['bookmark','⭐ 북마크만']
-          ].map(([k,label])=>`
-            <button class="${S.bankFilter.sort===k?'active':''}" onclick="S.bankFilter.sort='${k}';render()">${label}</button>
-          `).join('')}
-        </div>
-
-        <b>2. 과목 선택</b>
-        <div class="chips" style="margin-bottom:14px">
-          <button class="${S.bankFilter.subject==='전체'?'active':''}" onclick="setFilterSubject('전체')">과목 전체</button>
-          ${allSubjects.map(sub=>`
-            <button class="${S.bankFilter.subject===sub?'active':''}" onclick="setFilterSubject('${esc(sub)}')">${esc(sub)}</button>
-          `).join('')}
-        </div>
-
-        <b>3. 단원 목차 선택 (대 · 중 · 소단원)</b>
-        ${!isSubjectSelected?`
-          <div class="notice" style="margin-top:8px">
-            💡 위 <b>과목 선택</b>에서 특정 과목을 누르면 해당 과목의 <b>3단 목차 스크롤창</b>이 표시됩니다.
-          </div>
-        `:`
-          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px;height:210px">
-            <div style="border:1px solid #dfe4e1;border-radius:10px;display:flex;flex-direction:column;overflow:hidden;background:#fff">
-              <div style="padding:7px 10px;background:#f5f7f6;font-size:11px;font-weight:bold;border-bottom:1px solid #dfe4e1;color:#555">
-                대단원 (${majorList.length})
-              </div>
-              <div style="overflow-y:auto;flex:1;padding:5px" class="colList">
-                <button class="colItem ${S.bankFilter.major==='전체'?'active':''}" onclick="setFilterMajor('전체')">대단원 전체</button>
-                ${majorList.map(m=>`
-                  <button class="colItem ${S.bankFilter.major===m.name?'active':''}" onclick="setFilterMajor('${esc(m.name)}')">
-                    ${esc(m.name)} <small>(${m.count})</small>
-                  </button>
-                `).join('')}
-              </div>
-            </div>
-
-            <div style="border:1px solid #dfe4e1;border-radius:10px;display:flex;flex-direction:column;overflow:hidden;background:#fff">
-              <div style="padding:7px 10px;background:#f5f7f6;font-size:11px;font-weight:bold;border-bottom:1px solid #dfe4e1;color:#555">
-                중단원 ${minorList.length ? `(${minorList.length})` : ''}
-              </div>
-              <div style="overflow-y:auto;flex:1;padding:5px" class="colList">
-                ${!isMajorSelected ? `<div style="padding:10px 6px;font-size:11px;color:#888;text-align:center">대단원을<br>선택하세요</div>` :
-                  (minorList.length ? `
-                    <button class="colItem ${S.bankFilter.minor==='전체'?'active':''}" onclick="setFilterMinor('전체')">중단원 전체</button>
-                    ${minorList.map(min=>`
-                      <button class="colItem ${S.bankFilter.minor===min.name?'active':''}" onclick="setFilterMinor('${esc(min.name)}')">
-                        ${esc(min.name)} <small>(${min.count})</small>
-                      </button>
-                    `).join('')}
-                  ` : `<div style="padding:10px 6px;font-size:11px;color:#888;text-align:center">(하위 중단원 없음)</div>`)}
-              </div>
-            </div>
-
-            <div style="border:1px solid #dfe4e1;border-radius:10px;display:flex;flex-direction:column;overflow:hidden;background:#fff">
-              <div style="padding:7px 10px;background:#f5f7f6;font-size:11px;font-weight:bold;border-bottom:1px solid #dfe4e1;color:#555">
-                소단원 ${detailList.length ? `(${detailList.length})` : ''}
-              </div>
-              <div style="overflow-y:auto;flex:1;padding:5px" class="colList">
-                ${!isMinorSelected ? `<div style="padding:10px 6px;font-size:11px;color:#888;text-align:center">중단원을<br>선택하세요</div>` :
-                  (detailList.length ? `
-                    <button class="colItem ${S.bankFilter.detail==='전체'?'active':''}" onclick="setFilterDetail('전체')">소단원 전체</button>
-                    ${detailList.map(det=>`
-                      <button class="colItem ${S.bankFilter.detail===det.name?'active':''}" onclick="setFilterDetail('${esc(det.name)}')">
-                        ${esc(det.name)} <small>(${det.count})</small>
-                      </button>
-                    `).join('')}
-                  ` : `<div style="padding:10px 6px;font-size:11px;color:#888;text-align:center">(하위 소단원 없음)</div>`)}
-              </div>
-            </div>
-          </div>
-        `}
-
-        <div class="card" style="margin-top:14px;background:#f6f8f7;padding:12px 14px">
-          <div style="display:flex;justify-content:space-between;align-items:center">
-            <span style="font-size:13px">📍 선택 범위: <b>${esc(currentPathText)}</b></span>
-            <b style="color:#173d2a;font-size:16px">${previewCount} 문제</b>
-          </div>
-        </div>
-      </div>
-      <div class="modalFooter">
-        <button class="secondary" style="flex:1" onclick="clearBankFilters()">초기화</button>
-        <button class="primary" style="flex:2" onclick="closeBankFilterModal()">필터 적용하기</button>
-      </div>
-    </div>
-  </div>`;
-}
-
-// ---------------- 문제 직접 추가 모달 & 목차 자동 연동 로직 ----------------
 function openAddModal(){
   let sMap = subjectMap();
   let groups = Object.keys(sMap);
@@ -1137,10 +1413,6 @@ function openAddModal(){
     customGroup: "",
     subject: defaultSubj,
     customSubject: "",
-    catMode: "select",
-    selectedMajor: "",
-    selectedMinor: "",
-    selectedDetail: "",
     customCategory: "",
     type: "ox",
     text: "",
@@ -1149,179 +1421,33 @@ function openAddModal(){
     explanation: ""
   };
   S.addErrors = {};
-  initAddDraftCategory();
   S.showAddModal = true;
   render();
 }
-
-function initAddDraftCategory(){
-  let d = S.addDraft;
-  if(!d) return;
-  let s = d.subject === "직접입력" ? d.customSubject.trim() : d.subject;
-  let tree = buildTocTree(d.group === "직접입력" ? "" : d.group, s);
-  let majorKeys = Object.keys(tree);
-
-  if(majorKeys.length > 0){
-    d.catMode = "select";
-    d.selectedMajor = majorKeys[0];
-    let minors = Object.keys(tree[d.selectedMajor]?.children || {});
-    d.selectedMinor = minors[0] || "";
-    let details = d.selectedMinor ? Object.keys(tree[d.selectedMajor].children[d.selectedMinor]?.children || {}) : [];
-    d.selectedDetail = details[0] || "";
-  } else {
-    d.catMode = "custom";
-    d.customCategory = "";
-  }
-}
-
-function closeAddModal(){
-  S.showAddModal = false;
-  S.addDraft = null;
-  S.addErrors = {};
-  render();
-}
-
-function updateAddField(f, val){
-  if(!S.addDraft) return;
-  S.addDraft[f] = val;
-  if(S.addErrors[f]) delete S.addErrors[f];
-}
-
-function onAddGroupChange(val){
-  if(!S.addDraft) return;
-  S.addDraft.group = val;
-  if(val !== "직접입력"){
-    let sMap = subjectMap();
-    let subjs = sMap[val] || [];
-    S.addDraft.subject = subjs[0] || "직접입력";
-  } else {
-    S.addDraft.subject = "직접입력";
-  }
-  if(S.addErrors.group) delete S.addErrors.group;
-  if(S.addErrors.subject) delete S.addErrors.subject;
-  initAddDraftCategory();
-  render();
-}
-
-function onAddSubjectChange(val){
-  if(!S.addDraft) return;
-  S.addDraft.subject = val;
-  if(S.addErrors.subject) delete S.addErrors.subject;
-  initAddDraftCategory();
-  render();
-}
-
-function onAddMajorChange(val){
-  if(!S.addDraft) return;
-  if(val === "_custom_"){
-    S.addDraft.catMode = "custom";
-    render();
-    return;
-  }
-  S.addDraft.selectedMajor = val;
-  let s = S.addDraft.subject === "직접입력" ? S.addDraft.customSubject.trim() : S.addDraft.subject;
-  let tree = buildTocTree(S.addDraft.group === "직접입력" ? "" : S.addDraft.group, s);
-  let minors = Object.keys(tree[val]?.children || {});
-  S.addDraft.selectedMinor = minors[0] || "";
-  let details = S.addDraft.selectedMinor ? Object.keys(tree[val].children[S.addDraft.selectedMinor]?.children || {}) : [];
-  S.addDraft.selectedDetail = details[0] || "";
-  render();
-}
-
-function onAddMinorChange(val){
-  if(!S.addDraft) return;
-  S.addDraft.selectedMinor = val;
-  let s = S.addDraft.subject === "직접입력" ? S.addDraft.customSubject.trim() : S.addDraft.subject;
-  let tree = buildTocTree(S.addDraft.group === "직접입력" ? "" : S.addDraft.group, s);
-  let details = val ? Object.keys(tree[S.addDraft.selectedMajor]?.children[val]?.children || {}) : [];
-  S.addDraft.selectedDetail = details[0] || "";
-  render();
-}
-
-function updateAddChoice(i, val){
-  if(!S.addDraft) return;
-  S.addDraft.choices[i] = val;
-  if(S.addErrors.choices) delete S.addErrors.choices;
-}
-
-function addDraftChoiceItem(){
-  if(!S.addDraft) return;
-  S.addDraft.choices.push("");
-  render();
-}
-
-function removeDraftChoiceItem(i){
-  if(!S.addDraft) return;
-  S.addDraft.choices.splice(i, 1);
-  render();
-}
+function closeAddModal(){ S.showAddModal = false; render(); }
+function updateAddField(f, val){ if(S.addDraft) S.addDraft[f] = val; }
+function updateAddChoice(i, val){ if(S.addDraft) S.addDraft.choices[i] = val; }
+function addDraftChoiceItem(){ if(S.addDraft){ S.addDraft.choices.push(""); render(); } }
+function removeDraftChoiceItem(i){ if(S.addDraft){ S.addDraft.choices.splice(i, 1); render(); } }
 
 async function submitNewQuestion(){
   let d = S.addDraft;
-  if(!d) return;
+  if(!d.text.trim()){ alert("문제 본문을 입력하세요."); return; }
 
-  let errors = {};
-  let finalGroup = d.group === "직접입력" ? d.customGroup.trim() : d.group.trim();
-  let finalSubject = d.subject === "직접입력" ? d.customSubject.trim() : d.subject.trim();
-
-  // 1. 그룹 및 과목 검증
-  if(!finalGroup) errors.group = "과목 분류(그룹)를 입력하거나 선택해 주세요.";
-  if(!finalSubject) errors.subject = "과목명을 입력하거나 선택해 주세요.";
-
-  // 2. 본문 검증
-  if(!d.text.trim()) errors.text = "문제 본문 내용을 입력해 주세요.";
-
-  // 3. 선지 검증 (객관식)
-  if(d.type === "mcq"){
-    let validChoices = d.choices.map(c=>c.trim()).filter(Boolean);
-    if(!validChoices.length){
-      errors.choices = "객관식 보기를 최소 1개 이상 입력해야 합니다.";
-    }
-  }
-
-  // 4. 정답 검증
-  let cleanAns = d.answer.trim();
-  if(!cleanAns){
-    errors.answer = "정답을 입력해 주세요.";
-  } else if(d.type === "ox" && !["O","X"].includes(cleanAns.toUpperCase())){
-    errors.answer = "OX 문제는 정답을 O 또는 X로 지정해야 합니다.";
-  }
-
-  if(Object.keys(errors).length > 0){
-    S.addErrors = errors;
-    alert("⚠️ 필수 기재 항목이 누락되었습니다. 붉은색 입력창을 확인해 주세요.");
-    render();
-    return;
-  }
-
-  // 5. 단원 카테고리 구성
-  let catPath = [];
-  if(d.catMode === "select" && d.selectedMajor){
-    catPath = [d.selectedMajor, d.selectedMinor, d.selectedDetail].filter(Boolean).map(x=>x.trim());
-  } else {
-    let cat = d.customCategory.trim() || "기본단원";
-    catPath = cat.split(">").map(x=>x.trim()).filter(Boolean);
-  }
-  if(!catPath.length) catPath = ["기본단원"];
-
-  let finalChoices = d.type === "mcq" ? d.choices.map(c=>c.trim()).filter(Boolean) : [];
-
+  let catPath = d.customCategory.trim() ? d.customCategory.split(">").map(x=>x.trim()).filter(Boolean) : ["기본단원"];
   let newQ = {
     id: "custom-" + Date.now(),
     number: String(bank.length + 1),
-    group: finalGroup || "기타",
-    subject: finalSubject,
+    group: d.group || "기타",
+    subject: d.subject || "헌법",
     categoryPath: catPath,
     category: catPath.join(" > "),
     type: d.type,
     text: d.text.trim(),
-    choices: finalChoices,
-    answer: d.type === "ox" ? cleanAns.toUpperCase() : cleanAns,
-    explanation: d.explanation.trim() || "(해설이 없습니다.)",
-    incomplete: false,
-    sourcePages: ""
+    choices: d.type === "mcq" ? d.choices.map(c=>c.trim()).filter(Boolean) : [],
+    answer: d.type === "ox" ? d.answer.toUpperCase() : d.answer.trim(),
+    explanation: d.explanation.trim() || "(해설 없음)"
   };
-  newQ.issues = issuesFor(newQ);
 
   await fetch('/api/question', {
     method: 'POST',
@@ -1330,491 +1456,179 @@ async function submitNewQuestion(){
   });
 
   bank.push(newQ);
-  alert(`✅ 문제가 성공적으로 등록되었습니다!\n[${newQ.group} > ${newQ.subject}] ${newQ.category}\n정답: ${newQ.answer}`);
+  alert("문제가 등록되었습니다!");
   closeAddModal();
 }
 
 function addQuestionModal(){
   let d = S.addDraft;
-  let sMap = subjectMap();
-  let groups = Object.keys(sMap);
-  let curGroupSubjs = (d.group !== "직접입력" && sMap[d.group]) ? sMap[d.group] : [];
-  let err = S.addErrors || {};
-
-  let currentSubjectName = d.subject === "직접입력" ? d.customSubject.trim() : d.subject;
-  let currentGroupName = d.group === "직접입력" ? "" : d.group;
-  let tree = buildTocTree(currentGroupName, currentSubjectName);
-  let majorKeys = Object.keys(tree);
-  let hasJsonToc = majorKeys.length > 0;
-
-  let minorKeys = (d.selectedMajor && tree[d.selectedMajor]) ? Object.keys(tree[d.selectedMajor].children) : [];
-  let detailKeys = (d.selectedMajor && d.selectedMinor && tree[d.selectedMajor].children[d.selectedMinor]) ? Object.keys(tree[d.selectedMajor].children[d.selectedMinor].children) : [];
-
   return `<div class="modalOverlay" onclick="if(event.target===this)closeAddModal()">
     <div class="modalContent">
-      <div class="modalHeader">
-        <b style="font-size:17px">➕ 문제 직접 등록</b>
-        <button class="back" onclick="closeAddModal()">✕</button>
-      </div>
-      <div class="modalBody reviewBox" style="padding-top:10px">
-        
-        <div style="display:flex;justify-content:space-between;align-items:center;margin:14px 0 6px">
-          <label style="margin:0"><b>과목 분류 및 과목 선택 <span style="color:#d94848">*</span></b></label>
-          <span style="font-size:11px;color:#777">왼쪽: 대분류 / 오른쪽: 세부과목</span>
+      <div class="modalHeader"><b>➕ 문제 직접 등록</b><button class="back" onclick="closeAddModal()">✕</button></div>
+      <div class="modalBody reviewBox">
+        <label>과목 선택</label>
+        <select onchange="updateAddField('subject',this.value)">
+          <option value="헌법">헌법</option><option value="행정법">행정법</option>
+          <option value="형법">형법</option><option value="형사소송법">형사소송법</option>
+          <option value="민법">민법</option><option value="민사소송법">민사소송법</option>
+          <option value="가족법">가족법</option><option value="상법">상법</option>
+        </select>
+        <label>단원 (구분자는 ' > ' 입력)</label>
+        <input placeholder="예: 헌법총론 > 기본원리" value="${esc(d.customCategory)}" oninput="updateAddField('customCategory',this.value)">
+        <label>유형</label>
+        <div class="segmentedControl">
+          <button class="${d.type==='ox'?'active':''}" onclick="S.addDraft.type='ox';S.addDraft.answer='O';render()">OX</button>
+          <button class="${d.type==='mcq'?'active':''}" onclick="S.addDraft.type='mcq';S.addDraft.answer='1';render()">객관식</button>
         </div>
-        
-        <div class="row">
-          <div style="flex:1">
-            <select class="${err.group?'inputError':''}" onchange="onAddGroupChange(this.value)">
-              ${groups.map(g=>`<option value="${esc(g)}" ${d.group===g?'selected':''}>📁 ${esc(g)}</option>`).join('')}
-              <option value="직접입력" ${d.group==='직접입력'?'selected':''}>+ 그룹 직접 입력</option>
-            </select>
-            ${d.group === '직접입력' ? `
-              <input class="${err.group?'inputError':''}" style="margin-top:6px" placeholder="분류명 입력 (예: 공법)" value="${esc(d.customGroup)}" oninput="updateAddField('customGroup', this.value)">
-            ` : ''}
-            ${err.group ? `<span class="errMsg">⚠️ ${err.group}</span>` : ''}
-          </div>
-
-          <div style="flex:1">
-            <select class="${err.subject?'inputError':''}" onchange="onAddSubjectChange(this.value)">
-              ${curGroupSubjs.map(sub=>`<option value="${esc(sub)}" ${d.subject===sub?'selected':''}>📘 ${esc(sub)}</option>`).join('')}
-              <option value="직접입력" ${d.subject==='직접입력'?'selected':''}>+ 과목 직접 입력</option>
-            </select>
-            ${d.subject === '직접입력' ? `
-              <input class="${err.subject?'inputError':''}" style="margin-top:6px" placeholder="과목명 입력 (예: 헌법)" value="${esc(d.customSubject)}" oninput="updateAddField('customSubject', this.value);initAddDraftCategory();render();">
-            ` : ''}
-            ${err.subject ? `<span class="errMsg">⚠️ ${err.subject}</span>` : ''}
-          </div>
-        </div>
-
-        <div style="display:flex;justify-content:space-between;align-items:center;margin:18px 0 6px">
-          <label style="margin:0"><b>단원 목차 (대 · 중 · 소분류)</b></label>
-          ${hasJsonToc ? `
-            <button class="badge btn" style="font-size:11px" onclick="S.addDraft.catMode = (S.addDraft.catMode==='select'?'custom':'select');render()">
-              ${d.catMode === 'select' ? '✏️ 단원 직접 입력하기' : '📋 기존 JSON 목차에서 고르기'}
-            </button>
-          ` : `
-            <span class="badge gray">등록된 목차 없음 (직접 입력)</span>
-          `}
-        </div>
-
-        ${hasJsonToc && d.catMode === 'select' ? `
-          <div style="background:#f8faf9;border:1px solid #dfe5e2;border-radius:12px;padding:10px">
-            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">
-              <div>
-                <span style="font-size:10px;color:#666;font-weight:700">대분류</span>
-                <select style="margin-top:3px;padding:7px 5px;font-size:12px" onchange="onAddMajorChange(this.value)">
-                  ${majorKeys.map(m=>`<option value="${esc(m)}" ${d.selectedMajor===m?'selected':''}>${esc(m)}</option>`).join('')}
-                  <option value="_custom_">+ 직접 입력</option>
-                </select>
-              </div>
-              <div>
-                <span style="font-size:10px;color:#666;font-weight:700">중분류</span>
-                <select style="margin-top:3px;padding:7px 5px;font-size:12px" onchange="onAddMinorChange(this.value)">
-                  <option value="">(없음)</option>
-                  ${minorKeys.map(min=>`<option value="${esc(min)}" ${d.selectedMinor===min?'selected':''}>${esc(min)}</option>`).join('')}
-                </select>
-              </div>
-              <div>
-                <span style="font-size:10px;color:#666;font-weight:700">소분류</span>
-                <select style="margin-top:3px;padding:7px 5px;font-size:12px" onchange="S.addDraft.selectedDetail=this.value;render()">
-                  <option value="">(없음)</option>
-                  ${detailKeys.map(det=>`<option value="${esc(det)}" ${d.selectedDetail===det?'selected':''}>${esc(det)}</option>`).join('')}
-                </select>
-              </div>
-            </div>
-            <div style="margin-top:8px;font-size:11px;color:#245c35">
-              📌 선택 단원: <b>${esc([d.selectedMajor, d.selectedMinor, d.selectedDetail].filter(Boolean).join(' > ') || '기본단원')}</b>
-            </div>
-          </div>
-        ` : `
-          <div>
-            <input placeholder="예: 상법총칙 > 상행위 > 대리 (구분자는 ' > ' 입력)" value="${esc(d.customCategory)}" oninput="updateAddField('customCategory', this.value)">
-            <small style="color:#888;font-size:11px;display:block;margin-top:4px">💡 미입력 시 '기본단원'으로 자동 등록됩니다.</small>
-          </div>
-        `}
-
-        <label style="margin-top:16px"><b>문제 유형 <span style="color:#d94848">*</span></b></label>
-        <div class="segmentedControl" style="margin-top:0">
-          <button class="${d.type==='ox'?'active':''}" onclick="S.addDraft.type='ox';S.addDraft.answer='O';render()">OX 문제</button>
-          <button class="${d.type==='mcq'?'active':''}" onclick="S.addDraft.type='mcq';S.addDraft.answer='1';render()">객관식 (4~5지선다)</button>
-        </div>
-
-        <label><b>문제 본문 / 지문 <span style="color:#d94848">*</span></b></label>
-        <textarea class="${err.text?'inputError':''}" rows="4" placeholder="문제를 입력하세요 (필수)" oninput="updateAddField('text', this.value)">${esc(d.text)}</textarea>
-        ${err.text ? `<span class="errMsg">⚠️ ${err.text}</span>` : ''}
-
-        ${d.type === 'mcq' ? `
-          <div style="display:flex;justify-content:space-between;align-items:center;margin:14px 0 6px">
-            <label style="margin:0"><b>객관식 선지 <span style="color:#d94848">*</span></b></label>
+        <label>문제 본문</label>
+        <textarea rows="3" placeholder="지문 입력" oninput="updateAddField('text',this.value)">${esc(d.text)}</textarea>
+        ${d.type==='mcq'?`
+          <div style="display:flex;justify-content:space-between;align-items:center;margin:10px 0 4px">
+            <label style="margin:0">선지</label>
             <button class="badge btn" onclick="addDraftChoiceItem()">+ 선지 추가</button>
           </div>
-          ${d.choices.map((c, i)=>`
-            <div class="row" style="margin-bottom:6px;align-items:center">
-              <span class="badge gray" style="min-width:24px;text-align:center">${i+1}</span>
-              <input class="${err.choices?'inputError':''}" placeholder="선지 ${i+1} 내용" value="${esc(c)}" oninput="updateAddChoice(${i}, this.value)">
-              <button class="danger" style="flex:0 0 auto;padding:8px 12px;font-size:12px" onclick="removeDraftChoiceItem(${i})">삭제</button>
+          ${d.choices.map((c,i)=>`
+            <div class="row" style="margin-bottom:6px">
+              <input placeholder="선지 ${i+1}" value="${esc(c)}" oninput="updateAddChoice(${i},this.value)">
+              <button class="danger" style="flex:0" onclick="removeDraftChoiceItem(${i})">삭제</button>
             </div>
           `).join('')}
-          ${err.choices ? `<span class="errMsg">⚠️️ ${err.choices}</span>` : ''}
-
-          <label><b>정답 번호 <span style="color:#d94848">*</span></b> <small style="color:#777">(복수 정답은 쉼표 구분: 예: 1, 3)</small></label>
-          <input class="${err.answer?'inputError':''}" placeholder="예: 1 또는 3" value="${esc(d.answer)}" oninput="updateAddField('answer', this.value)">
-          ${err.answer ? `<span class="errMsg">⚠️ ${err.answer}</span>` : ''}
-        ` : `
-          <label><b>정답 선택 <span style="color:#d94848">*</span></b></label>
-          <div class="segmentedControl" style="margin-top:0">
+          <label>정답 번호 (복수 정답: 1, 3)</label>
+          <input value="${esc(d.answer)}" oninput="updateAddField('answer',this.value)">
+        `:`
+          <label>정답</label>
+          <div class="segmentedControl">
             <button class="${d.answer==='O'?'active':''}" onclick="updateAddField('answer','O');render()">O</button>
             <button class="${d.answer==='X'?'active':''}" onclick="updateAddField('answer','X');render()">X</button>
           </div>
         `}
-
-        <label><b>해설 (선택)</b></label>
-        <textarea rows="3" placeholder="해설을 입력하세요 (미입력 가능)" oninput="updateAddField('explanation', this.value)">${esc(d.explanation)}</textarea>
-
+        <label>해설</label>
+        <textarea rows="2" placeholder="해설" oninput="updateAddField('explanation',this.value)">${esc(d.explanation)}</textarea>
       </div>
       <div class="modalFooter">
-        <button class="secondary" style="flex:1" onclick="closeAddModal()">취소</button>
-        <button class="primary" style="flex:2" onclick="submitNewQuestion()">💾 문제 등록하기</button>
+        <button class="primary full" onclick="submitNewQuestion()">서버에 등록</button>
       </div>
     </div>
   </div>`;
 }
 
-// ---------------- 멀티 파일 업로드 & 서버 병합 로직 ----------------
-function importPage(){
-  let newSubjects = new Set(S.pendingQuestions.map(q=>q.subject||"미분류"));
-  return topBar("문제 파일 불러오기")+`
-  <section class="title"><h1>JSON 문제 파일 등록</h1>
-  <p>과목별 분리 JSON 파일을 여러 개 선택하여 한 번에 서버 DB에 병합하거나 추가할 수 있습니다.</p></section>
-  <section class="section">
-    <div class="upload">
-      <div class="ico">📚</div>
-      <h2>JSON 파일 선택 (다중 선택 가능)</h2>
-      <p class="notice"><code>Ctrl</code> 또는 <code>Shift</code> 키를 누른 채 여러 JSON 파일을 한 번에 선택할 수 있습니다.</p>
-      <input id="jsonFiles" type="file" accept=".json,application/json" multiple class="hidden" onchange="multipleFilesChosen(this)">
-      <button class="primary" onclick="document.getElementById('jsonFiles').click()">JSON 파일 선택하기</button>
-      ${S.files.length?`<div class="file" style="margin-top:14px">
-        <b>선택된 파일 (${S.files.length}개):</b><br>
-        ${S.files.map(f=>`• ${esc(f.name)}`).join('<br>')}
-      </div>`:""}
-    </div>
-  </section>
-  
-  ${S.pendingQuestions.length?`
-    <section class="section">
-      <div class="card">
-        <b>불러온 파일 분석 결과</b>
-        <div class="kpi">
-          <div><b>${S.files.length}</b><span>선택 파일 수</span></div>
-          <div><b>${S.pendingQuestions.length}</b><span>총 문제 수</span></div>
-          <div><b>${newSubjects.size}</b><span>감지된 과목 수</span></div>
-          <div><b>${bank.length}</b><span>현재 저장된 문제</span></div>
-        </div>
-        <div class="chips" style="margin-top:12px">
-          ${[...newSubjects].map(s=>`<span class="badge blue">${esc(s)} (${S.pendingQuestions.filter(q=>q.subject===s).length}개)</span>`).join(' ')}
-        </div>
-      </div>
-      
-      <div style="display:flex;flex-direction:column;gap:10px;margin-top:14px">
-        <button class="primary full" style="padding:16px" onclick="applyImport('merge')">
-          ➕ 서버 DB에 [추가 및 병합] (권장)
-        </button>
-        <button class="secondary full" style="padding:14px" onclick="applyImport('replace')">
-          ⚠️ 기존 문제 모두 지우고 [새로 덮어쓰기]
-        </button>
-        <button class="danger full" onclick="clearImport()">취소</button>
-      </div>
-    </section>
-  `:""}
-  `;
-}
-
-function multipleFilesChosen(input){
-  let fileList = Array.from(input.files || []);
-  if(!fileList.length) return;
-  S.files = fileList;
-  S.pendingQuestions = [];
-  S.pendingMetaList = [];
-
-  let readPromises = fileList.map(f=>{
-    return new Promise((resolve, reject)=>{
-      let r = new FileReader();
-      r.onload = ()=>{
-        try {
-          let d = JSON.parse(r.result);
-          let {meta, qs} = validateSingleFile(d);
-          resolve({meta, qs});
-        } catch(e) {
-          reject(new Error(`[${f.name}] ${e.message}`));
-        }
-      };
-      r.readAsText(f);
-    });
-  });
-
-  Promise.all(readPromises).then(results=>{
-    let allQs = [];
-    results.forEach(res=>{
-      S.pendingMetaList.push(res.meta);
-      allQs.push(...res.qs);
-    });
-    let seen = new Set();
-    allQs.forEach((q, idx)=>{
-      if(seen.has(q.id)){
-        q.id = q.id + "_dup" + idx;
-      }
-      seen.add(q.id);
-    });
-    S.pendingQuestions = allQs;
-    render();
-  }).catch(err=>{
-    alert("파일 읽기 오류: " + err.message);
-    clearImport();
-  });
-}
-
-async function applyImport(mode){
-  if(!S.pendingQuestions.length) return;
-
-  if(mode === 'replace'){
-    if(!confirm("서버의 모든 문제가 삭제되고 선택한 파일의 문제로 대체됩니다. 계속하시겠습니까?")) return;
-  }
-
-  const res = await fetch('/api/import', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ questions: S.pendingQuestions, mode })
-  });
-  const data = await res.json();
-  
-  alert(`서버 업데이트 완료! (${data.count}문제 반영됨)`);
-  clearImport();
-  await fetchBootstrap();
-  go('home');
-}
-
-function clearImport(){
-  S.files = [];
-  S.pendingQuestions = [];
-  S.pendingMetaList = [];
-  render();
-}
-
 function openEdit(id){
-  stopTimer();
   let q=bank.find(x=>x.id===id);
-  if(!q)return;
+  if(!q) return;
   S.editingId=id;
-  S.editDraft={
-    number:q.number,type:q.type,text:q.text,
-    choices:q.choices.slice(),answer:q.answer,
-    explanation:q.explanation,group:q.group,subject:q.subject,category:q.category||"기본단원"
-  };
+  S.editDraft={ ...q, choices:[...q.choices] };
   render();
 }
-function closeEdit(){
-  S.editingId=null;
-  S.editDraft=null;
-  render();
-  startTimerIfNeeded();
-}
-function updateEditField(field,v){if(S.editDraft)S.editDraft[field]=v}
-function updateEditType(v){if(!S.editDraft)return;S.editDraft.type=v;render()}
-function updateEditChoice(i,v){if(S.editDraft)S.editDraft.choices[i]=v}
-function addEditChoice(){if(!S.editDraft)return;S.editDraft.choices.push("");render()}
-function removeEditChoice(i){if(!S.editDraft)return;S.editDraft.choices.splice(i,1);render()}
-
+function closeEdit(){ S.editingId=null; S.editDraft=null; render(); }
+function updateEditField(f,v){ if(S.editDraft) S.editDraft[f]=v; }
 async function saveEdit(){
-  let q=bank.find(x=>x.id===S.editingId);
-  if(!q||!S.editDraft)return;
-  let d=S.editDraft;
-  q.number=String(d.number??q.number);
-  q.group=String(d.group??"");
-  q.subject=String(d.subject??"");
-  q.category=String(d.category??"기본단원");
-  q.categoryPath=q.category.split(">").map(x=>x.trim()).filter(Boolean);
-  q.type=d.type==="ox"?"ox":"mcq";
-  q.text=String(d.text??"");
-  q.choices=q.type==="mcq"?d.choices.map(c=>String(c??"")):[];
-  q.answer=q.type==="ox"?String(d.answer??"").toUpperCase():String(d.answer??"");
-  q.explanation=String(d.explanation??"");
-  q.issues=issuesFor(q);
-
+  let q = S.editDraft;
   await fetch('/api/question', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(q)
   });
-
-  if(S.queue&&S.queue.length){
-    let qi=S.queue.findIndex(x=>x.id===q.id);
-    if(qi>=0)S.queue[qi]=q;
-  }
-  S.editingId=null;S.editDraft=null;
-  render();
-  startTimerIfNeeded();
+  let idx = bank.findIndex(x=>x.id===q.id);
+  if(idx>=0) bank[idx] = q;
+  closeEdit();
 }
-
 async function deleteQuestion(id){
-  if(!confirm("이 문제를 서버 DB에서 영구 삭제하시겠습니까?"))return;
+  if(!confirm("문제를 삭제하시겠습니까?")) return;
   await fetch(`/api/question/${id}`, { method: 'DELETE' });
-  
-  bank=bank.filter(q=>q.id!==id);
-  delete stats[id];
-  bookmarks=bookmarks.filter(x=>x!==id);
-  delete notes[id];
-  
-  S.editingId=null;S.editDraft=null;
-  if(S.queue&&S.queue.length){
-    let wasIdx=S.queue.findIndex(q=>q.id===id);
-    S.queue=S.queue.filter(q=>q.id!==id);
-    if(!S.queue.length){alert("남은 문제가 없습니다.");go("home");return}
-    if(wasIdx>=0){
-      S.qi=Math.min(S.qi,S.queue.length-1);
-      S.selected=[];S.submitted=false;S.retryPrompt=false;S.retrying=false;
-    }
-  }
+  bank = bank.filter(x=>x.id!==id);
   render();
-  startTimerIfNeeded();
 }
 
 function editForm(){
   let d=S.editDraft;
   return `<div class="card" style="margin-top:12px;border:2px solid #173d2a">
-    <b>✏️ 문제 수정 (서버 반영)</b>
+    <b>✏️ 문제 수정</b>
     <div class="reviewBox">
-      <label>문제 번호</label><input value="${esc(d.number)}" onchange="updateEditField('number',this.value)">
-      <div class="row">
-        <div><label>과목 분류 (그룹)</label><input value="${esc(d.group)}" onchange="updateEditField('group',this.value)"></div>
-        <div><label>과목</label><input value="${esc(d.subject)}" onchange="updateEditField('subject',this.value)"></div>
-      </div>
-      <label>목차 / 세부 단원 (구분자는 ' > ' 사용)</label>
-      <input value="${esc(d.category)}" placeholder="예: 상법총칙 > 영업양도" onchange="updateEditField('category',this.value)">
-      <label>문제 유형</label>
-      <select onchange="updateEditType(this.value)">
-        <option value="mcq" ${d.type==="mcq"?"selected":""}>객관식</option>
-        <option value="ox" ${d.type==="ox"?"selected":""}>OX</option>
-      </select>
-      <label>본문</label><textarea rows="4" onchange="updateEditField('text',this.value)">${esc(d.text)}</textarea>
-      ${d.type==="mcq"?`
-        <label>선지</label>
-        ${d.choices.map((c,i)=>`<div class="row" style="margin-bottom:6px;align-items:center">
-          <input value="${esc(c)}" onchange="updateEditChoice(${i},this.value)" placeholder="선지 ${i+1}">
-          <button class="danger" style="flex:0 0 auto" onclick="removeEditChoice(${i})">삭제</button>
-        </div>`).join("")}
-        <button class="secondary full" onclick="addEditChoice()">+ 선지 추가</button>
-        <label>정답 번호 (복수 정답일 경우 쉼표로 구분 예: 1, 3, 4)</label><input value="${esc(d.answer)}" onchange="updateEditField('answer',this.value)">
-      `:`
-        <label>정답</label>
-        <select onchange="updateEditField('answer',this.value)">
-          <option value="O" ${d.answer==="O"?"selected":""}>O</option>
-          <option value="X" ${d.answer==="X"?"selected":""}>X</option>
-        </select>
-      `}
-      <label>해설</label><textarea rows="4" onchange="updateEditField('explanation',this.value)">${esc(d.explanation)}</textarea>
+      <label>본문</label><textarea rows="3" oninput="updateEditField('text',this.value)">${esc(d.text)}</textarea>
+      <label>정답</label><input value="${esc(d.answer)}" oninput="updateEditField('answer',this.value)">
+      <label>해설</label><textarea rows="2" oninput="updateEditField('explanation',this.value)">${esc(d.explanation)}</textarea>
     </div>
-    <div class="row" style="margin-top:14px">
+    <div class="row" style="margin-top:10px">
       <button class="primary" onclick="saveEdit()">저장</button>
       <button class="secondary" onclick="closeEdit()">취소</button>
     </div>
-    <button class="danger full" style="margin-top:8px" onclick="deleteQuestion('${esc(S.editingId)}')">🗑️ 이 문제 삭제</button>
   </div>`;
 }
 
 function wrongPage(){
   let arr=bank.filter(q=>st(q.id).wrong>0);
   return topBar("오답노트")+`<section class="title"><h1>오답노트</h1><p>${arr.length}문제</p></section><section class="section">
-  ${arr.length?arr.map(q=>{
-    if(S.editingId===q.id)return `<div class="listItem">${editForm()}</div>`;
-    let t=st(q.id);return `<div class="listItem">
-      <div style="display:flex;gap:5px;margin-bottom:6px">
-        <span class="badge">${esc(q.subject)}</span>
-        <span class="badge blue">${esc(q.category||"기본단원")}</span>
-      </div>
-      <p><b>${esc(q.number)}.${esc(q.text)}</b></p>
-      <small>오답 ${t.wrong}회 · 정답률 ${t.attempts?Math.round(t.correct/t.attempts*100):0}\% ${notes[q.id]?`· ${esc(notes[q.id])}`:""}</small>
-      <div class="row" style="margin-top:10px">
-        <button class="secondary" onclick="openEdit('${esc(q.id)}')">✏️ 수정</button>
-        <button class="danger" onclick="deleteQuestion('${esc(q.id)}')">🗑️ 삭제</button>
-      </div>
-    </div>`}).join(""):`<div class="empty">아직 오답이 없습니다.</div>`}
-  </section>`;
+  ${arr.length?arr.map(q=>`<div class="listItem">
+    <span class="badge red">${esc(q.subject)}</span>
+    <p><b>${esc(q.text)}</b></p>
+    <small>오답 ${st(q.id).wrong}회 · 정답: ${esc(q.answer)}</small>
+  </div>`).join(''):`<div class="empty">오답이 없습니다.</div>`}
+  </section>${bottom()}`;
 }
 
 function bookmarkPage(){
   let arr=bank.filter(q=>bookmarks.includes(q.id));
   return topBar("북마크")+`<section class="title"><h1>⭐ 북마크</h1><p>${arr.length}문제</p></section><section class="section">
-  ${arr.length?arr.map(q=>{
-    if(S.editingId===q.id)return `<div class="listItem">${editForm()}</div>`;
-    return `<div class="listItem">
-      <div style="display:flex;gap:5px;margin-bottom:6px">
-        <span class="badge">${esc(q.subject)}</span>
-        <span class="badge blue">${esc(q.category||"기본단원")}</span>
+  ${arr.length?arr.map(q=>`<div class="listItem">
+    <span class="badge blue">${esc(q.subject)}</span>
+    <p><b>${esc(q.text)}</b></p>
+    <small>정답: ${esc(q.answer)}</small>
+  </div>`).join(''):`<div class="empty">북마크한 문제가 없습니다.</div>`}
+  </section>${bottom()}`;
+}
+
+function importPage(){
+  return topBar("문제 파일 업로드") + `
+    <section class="section">
+      <div class="upload">
+        <div class="ico">📚</div>
+        <h2>JSON 파일 서버 일괄 업로드</h2>
+        <input id="jsonFiles" type="file" accept=".json,application/json" class="hidden" onchange="uploadJsonFile(this)">
+        <button class="primary" onclick="document.getElementById('jsonFiles').click()">JSON 파일 선택하기</button>
       </div>
-      <p><b>${esc(q.number)}.${esc(q.text)}</b></p>
-      <small>${notes[q.id]?esc(notes[q.id]):"비고 없음"}</small>
-      <div class="row" style="margin-top:10px">
-        <button class="secondary" onclick="openEdit('${esc(q.id)}')">✏️ 수정</button>
-        <button class="danger" onclick="deleteQuestion('${esc(q.id)}')">🗑️ 삭제</button>
-      </div>
-    </div>`}).join(""):`<div class="empty">북마크한 문제가 없습니다.</div>`}
-  </section>`;
+    </section>
+    ${bottom()}
+  `;
 }
 
-function bottom(){return `<div class="bottom">
-  <button onclick="go('home')">⌂<small>홈</small></button>
-  <button onclick="go('bankPage')">📚<small>문제은행</small></button>
-  <button onclick="go('wrongPage')">📕<small>오답</small></button>
-  <button onclick="go('bookmarkPage')">⭐<small>북마크</small></button>
-</div>`}
-
-function exportMaster(){
-  let data={
-    version:5,
-    bookTitle:masterMeta.bookTitle||"LAW QUIZ 통합 문제은행",
-    processing:masterMeta.processing||{lastSourcePage:null,hasIncompleteQuestion:bank.some(q=>q.incomplete),incompleteQuestionId:null},
-    questions:bank.map(q=>({
-      id:q.id,number:q.number,group:q.group,subject:q.subject,categoryPath:q.categoryPath,category:q.category,type:q.type,text:q.text,
-      choices:q.choices,answer:q.answer,explanation:q.explanation,
-      ...(q.incomplete?{incomplete:true}:{}),
-      ...(q.sourcePages?{sourcePages:q.sourcePages}:{})
-    })),
-    warnings:Array.isArray(masterMeta.warnings)?masterMeta.warnings:[],
-    exportedAt:new Date().toISOString()
-  };
-  let blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
-  let a=document.createElement("a");a.href=URL.createObjectURL(blob);
-  a.download="master_questions_all_"+new Date().toISOString().slice(0,10)+".json";a.click();
-  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
-}
-
-function exportProgress(){
-  let data={version:5,exportedAt:new Date().toISOString(),stats,settings,bookmarks,notes};
-  let blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
-  let a=document.createElement("a");a.href=URL.createObjectURL(blob);
-  a.download="lawquiz_progress_all_"+new Date().toISOString().slice(0,10)+".json";a.click();
-  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
-}
-
-function restoreProgress(input){
-  let f=input.files[0];if(!f)return;
-  let r=new FileReader();
-  r.onload=()=>{
-    try{
-      let d=JSON.parse(r.result);
-      if(!d.stats||!d.settings)throw Error("학습기록 JSON 형식이 아닙니다.");
-      stats=d.stats;settings=d.settings;bookmarks=Array.isArray(d.bookmarks)?d.bookmarks:[];notes=d.notes||{};
-      alert("학습기록을 불러왔습니다.");render();
-    }catch(e){alert("복원 실패: "+e.message)}
+async function uploadJsonFile(input){
+  let f = input.files[0];
+  if(!f) return;
+  let r = new FileReader();
+  r.onload = async () => {
+    try {
+      let d = JSON.parse(r.result);
+      let { qs } = validateSingleFile(d);
+      const res = await fetch('/api/import', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ questions: qs, mode: 'merge' })
+      });
+      const data = await res.json();
+      alert(`성공적으로 ${data.count}문제를 서버에 병합했습니다!`);
+      await fetchBootstrap();
+      go('home');
+    } catch(e){
+      alert("업로드 실패: " + e.message);
+    }
   };
   r.readAsText(f);
 }
 
-// 1. 화면 즉시 렌더링 (흰 화면 방지)
+function bottom(){
+  return `<div class="bottom">
+    <button onclick="go('home')">⌂<small>홈</small></button>
+    <button onclick="go('testSetupPage')">📝<small>테스트</small></button>
+    <button onclick="go('bankPage')">📚<small>문제은행</small></button>
+    <button onclick="go('wrongPage')">📕<small>오답</small></button>
+    <button onclick="go('bookmarkPage')">⭐<small>북마크</small></button>
+  </div>`;
+}
+
+// 1. 화면 즉시 렌더링
 render();
 
-// 2. 서버 DB 데이터 비동기 로드
+// 2. 서버 데이터 비동기 로드
 fetchBootstrap();
 </script>
 </body>
