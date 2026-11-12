@@ -1,0 +1,2270 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>상법짱2026</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f3f5f4;color:#17191c;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR",sans-serif}
+button,input,textarea,select{font:inherit}button{cursor:pointer}
+.app{max-width:860px;min-height:100vh;margin:auto;background:#fff;padding-bottom:90px;box-shadow:0 0 30px #0001}
+.hero{padding:44px 25px 30px;background:linear-gradient(145deg,#102b1d,#214c35);color:#fff;border-radius:0 0 28px 28px}
+.brand{font-weight:800;font-size:14px;margin-bottom:28px}.hero h1{font-size:32px;line-height:1.25;margin:0 0 10px;letter-spacing:-1.3px}
+.hero p{margin:0;opacity:.82;font-size:14px;line-height:1.6}
+.section{padding:14px 20px}.top{height:62px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;border-bottom:1px solid #eee;position:sticky;top:0;background:#fff;z-index:4}
+.back{border:0;background:none;font-size:22px}.title{padding:26px 22px 10px}.title h1{margin:0 0 7px;font-size:26px}.title p{margin:0;color:#777;font-size:13px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.stat{background:#f6f8f7;border-radius:14px;padding:14px}.stat b{font-size:20px;display:block}.stat span{font-size:11px;color:#777}
+.group{border:1px solid #e1e5e3;border-radius:18px;padding:18px;margin-bottom:12px;background:#fff}.group b{font-size:18px}
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}
+.chips button{border:1px solid #dfe4e1;background:#f8faf9;border-radius:9px;padding:8px 12px;transition:0.15s;font-size:13px}
+.chips button:hover{background:#eef3f0}
+.chips button.active{background:#173d2a;color:#fff;border-color:#173d2a;font-weight:bold}
+.primary,.secondary,.danger{border:0;border-radius:13px;padding:14px 17px;font-weight:800}.primary{background:#173d2a;color:#fff}.secondary{background:#edf0ee;color:#303532}.danger{background:#f8e8e8;color:#982f2f}.full{width:100%;margin-top:10px}
+.card{border:1px solid #e1e5e3;border-radius:18px;padding:18px;margin-bottom:12px}
+.upload{border:2px dashed #b7c2bc;border-radius:18px;padding:28px;text-align:center;background:#fafcfb}.upload .ico{font-size:42px}
+.file{margin:14px 0;background:#f0f3f1;border-radius:10px;padding:11px;text-align:left;font-size:13px}.hidden{display:none}
+.notice{padding:13px 15px;border-radius:12px;background:#f5f7f6;color:#666;font-size:12px;line-height:1.6}
+.notice.warn{background:#fff8e8;color:#76551a}.notice.good{background:#edf8f0;color:#245c35}.notice.bad{background:#fff2f2;color:#8b2c2c}
+.progress{height:7px;background:#e7ebe8;border-radius:99px;overflow:hidden}.progress span{display:block;height:100%;background:#214c35;transition:.3s}
+.reviewBox label{display:block;font-size:12px;color:#777;margin:14px 0 6px}.reviewBox input,.reviewBox textarea,.reviewBox select{width:100%;border:1px solid #dfe4e1;border-radius:10px;padding:11px;outline:none;line-height:1.55}
+.row{display:flex;gap:9px}.row>*{flex:1}
+.badge{display:inline-block;padding:5px 9px;border-radius:8px;background:#eef3f0;color:#31533f;font-size:11px;font-weight:800}
+.badge.warn{background:#fff1cf;color:#805b16}.badge.red{background:#ffe8e8;color:#922e2e}.badge.blue{background:#e8f0ff;color:#28518b}.badge.gray{background:#f0f0f0;color:#555}
+.badge.btn{cursor:pointer;border:1px solid #d5dad7}
+.badge.btn:disabled{opacity:0.4;cursor:not-allowed}
+.listItem{border:1px solid #e1e5e3;border-radius:14px;padding:15px;margin-bottom:10px}.listItem small{color:#777}.empty{text-align:center;color:#888;padding:60px 20px}
+.qtext{font-size:20px;line-height:1.65;margin:18px 0 22px;white-space:pre-wrap}.answers{display:grid;gap:9px}
+.answer{border:1px solid #dfe4e1;background:#fff;border-radius:13px;padding:14px 16px;text-align:left;line-height:1.5;transition:0.12s}
+.answer.sel{border:2px solid #173d2a;background:#f2f7f4}
+.result{margin-top:18px;padding:18px;border-radius:16px;background:#f5f8f6}.wrong{background:#fff7f7;border:1px solid #efd0d0}.correct{border:1px solid #cfe2d6}
+.explain{border-top:1px solid #e2e6e3;margin-top:14px;padding-top:14px;line-height:1.65;white-space:pre-wrap}.note{margin-top:14px}.note input{width:100%;margin-top:6px;border:1px solid #dfe4e1;border-radius:9px;padding:10px}
+
+/* 하단 6탭 네비게이션 */
+.bottom{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(860px,100%);height:70px;background:#fff;border-top:1px solid #e5e8e6;display:grid;grid-template-columns:repeat(6,1fr);z-index:5}.bottom button{border:0;background:#fff;color:#555}.bottom small{display:block;margin-top:4px;font-size:10px}
+.meta{font-size:12px;color:#777;line-height:1.6}
+.kpi{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:12px}.kpi>div{background:#f7f8f7;border-radius:12px;padding:12px}.kpi b{display:block;font-size:18px}.kpi span{font-size:11px;color:#777}
+details{border:1px solid #e1e5e3;border-radius:12px;padding:10px 12px;margin-top:10px}summary{cursor:pointer;font-weight:700}
+.search{width:100%;border:1px solid #dfe4e1;border-radius:11px;padding:11px}
+.optionCard{border:2px solid #e1e5e3;border-radius:14px;padding:16px;margin-bottom:10px;cursor:pointer;transition:.15s}
+.optionCard.active{border-color:#173d2a;background:#f4f8f5}
+.rangeWrap{margin:16px 0 10px}
+.rangeWrap input[type=range]{width:100%;margin:10px 0;accent-color:#173d2a}
+
+.tocBox{background:#fbfcfa;border:1px solid #dce4df;border-radius:14px;padding:14px;margin-bottom:10px}
+.tocBoxHeader{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;padding-bottom:6px;border-bottom:1px dashed #e1e5e3}
+.tocSubBox{background:#fff;border:1px solid #e8edea;border-radius:10px;padding:10px;margin-top:8px}
+
+.segmentedControl{display:flex;background:#eaeeeb;border-radius:12px;padding:4px;gap:4px;margin-top:10px}
+.segmentedControl button{flex:1;border:0;background:transparent;padding:12px 0;border-radius:9px;font-weight:700;font-size:13px;color:#555;transition:all 0.2s cubic-bezier(0.4,0,0.2,1)}
+.segmentedControl button.active{background:#fff;color:#173d2a;box-shadow:0 2px 8px rgba(0,0,0,0.08)}
+
+/* 타이머 UI */
+.timerBox{background:#fff3f3;border:1px solid #ffd0d0;border-radius:12px;padding:8px 12px;display:flex;align-items:center;justify-content:space-between;margin-top:10px}
+.timerProgress{height:5px;background:#f0e3e3;border-radius:99px;overflow:hidden;margin-top:4px}
+.timerProgress span{display:block;height:100%;background:#d94848;transition:0.1s linear}
+.timerText{font-size:14px;font-weight:800;color:#c02b2b}
+
+/* 모달 */
+.modalOverlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.55);display:flex;align-items:center;justify-content:center;z-index:99;padding:16px}
+.modalContent{background:#fff;border-radius:20px;width:min(660px,100%);max-height:88vh;display:flex;flex-direction:column;box-shadow:0 10px 35px rgba(0,0,0,0.2)}
+.modalHeader{padding:18px 22px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center}
+.modalBody{padding:18px 22px;overflow-y:auto;flex:1}
+.modalFooter{padding:14px 22px;border-top:1px solid #eee;display:flex;gap:10px}
+
+.colList{display:flex;flex-direction:column;gap:3px}
+.colItem{width:100%;text-align:left;border:0;background:transparent;padding:7px 9px;border-radius:6px;font-size:12px;line-height:1.35;color:#333;cursor:pointer;word-break:break-all}
+.colItem:hover{background:#f0f4f2}
+.colItem.active{background:#173d2a;color:#fff;font-weight:bold}
+.colItem small{opacity:0.8;font-size:11px}
+
+.inputError{border:2px solid #d94848 !important;background:#fff8f8 !important}
+.errMsg{color:#c02b2b;font-size:11px;font-weight:700;margin-top:4px;display:block}
+
+/* 시험 결과 카드 */
+.testRankCard{background:#fbfcfa;border:1px solid #e1e5e3;border-radius:12px;padding:12px;margin-bottom:8px}
+.badge.good{background:#e3f4e8;color:#1f5f33}
+.resHead{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin:24px 0 10px}
+.resFilters{display:flex;gap:6px;margin-left:auto}
+.resFilters select{border:1px solid #d5dad7;border-radius:9px;padding:7px 9px;background:#fff;font-size:13px}
+.resItem{border:1px solid #e1e5e3;border-radius:12px;margin-bottom:8px;background:#fff;overflow:hidden}
+.resItem.wrongItem{border-left:4px solid #d94848}.resItem.rightItem{border-left:4px solid #2f8a4c}
+.resItem summary{list-style:none;cursor:pointer;padding:12px 14px;display:flex;align-items:center;gap:10px}
+.resItem summary::-webkit-details-marker{display:none}
+.resItem summary .num{font-weight:800;min-width:34px;font-size:14px}
+.resItem summary .txt{flex:1;font-size:13px;color:#333;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.resItem summary .sec{font-size:12px;color:#777;white-space:nowrap}
+.resItem summary .chev{transition:transform .15s;color:#999}
+.resItem[open] summary .chev{transform:rotate(90deg)}
+.resBody{padding:4px 14px 14px;font-size:13px;line-height:1.6;border-top:1px solid #eef1ef}
+.resChoice{padding:6px 9px;border-radius:8px;margin:4px 0;background:#f6f8f7}
+.resChoice.isAns{background:#e3f4e8;font-weight:700}.resChoice.isMineWrong{background:#ffe8e8}
+.editorLine{font-size:11px;color:#8a8f8c;margin-top:4px}
+/* 상법짱2026: 좌우 슬라이드 선택 카드 */
+.slider{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 2px 10px;-webkit-overflow-scrolling:touch}
+.slider::-webkit-scrollbar{height:6px}.slider::-webkit-scrollbar-thumb{background:#d5ddd8;border-radius:9px}
+.slide{flex:0 0 72%;max-width:340px;scroll-snap-align:center;border:2px solid #e1e5e3;border-radius:18px;padding:20px;cursor:pointer;background:#fff;transition:.15s}
+.slide.active{border-color:#173d2a;background:#f2f7f4;box-shadow:0 4px 14px #173d2a22}
+.slide .big{font-size:22px;font-weight:800;margin:6px 0 4px}
+.sumBox{border:1px solid #dfe6e2;border-radius:14px;padding:12px 14px;margin:12px 0;background:#fbfcfb}
+.sumHead{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.sumRow{display:flex;justify-content:space-between;gap:10px;font-size:13px;padding:5px 0;border-top:1px dashed #edf0ee}
+.sumRow span{color:#777}.sumRow b{text-align:right}
+.setSummary{background:#f6f8f7}
+.sumRow{display:flex;justify-content:space-between;align-items:center;font-size:14px;padding:7px 0;border-top:1px solid #e8ece9}
+.sumRow span{color:#666}
+.unitHead{flex:1;display:flex;align-items:center;gap:8px;border:0;background:none;text-align:left;padding:6px 2px;font-size:15px;flex-wrap:wrap}
+.unitHead .chev2{color:#888;font-size:12px;width:14px}
+.filterGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.filterGrid label{font-size:11px;color:#777;display:flex;flex-direction:column;gap:4px}
+.filterGrid select{border:1px solid #d5dad7;border-radius:9px;padding:9px;background:#fff;font-size:13px;color:#222}
+.listItem.clickable{cursor:pointer}.listItem.clickable:hover{background:#f7faf8}
+.answers.oxRow{grid-template-columns:1fr 1fr;gap:12px}
+.oxBtn{text-align:center;font-size:34px;line-height:1;padding:20px 10px}
+.srcLine{font-size:12px;color:#6b726e;margin-top:12px;padding-top:8px;border-top:1px dashed #dfe4e1;white-space:normal}
+/* ===== 상법짱2026 테마 (Pretendard · 법전 남색) ===== */
+:root{
+  --paper:#F3F4F6; --surface:#FFFFFF; --ink:#15181D; --sub:#666D78; --faint:#9AA0A9;
+  --line:#E2E5EA; --line2:#EEF0F3;
+  --navy:#1C2E4A; --navy2:#2A4166; --tint:#EBF0F7;
+  --red:#C2362F; --redTint:#FBEDEC; --green:#23794B; --greenTint:#E8F4EC; --amber:#9A6A12; --amberTint:#FBF3E2;
+}
+body{background:var(--paper);color:var(--ink);font-family:"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+  -webkit-font-smoothing:antialiased;letter-spacing:-0.01em;font-feature-settings:"tnum" 0}
+.app{background:var(--surface);box-shadow:none;border-left:1px solid var(--line2);border-right:1px solid var(--line2)}
+:focus-visible{outline:2px solid var(--navy2);outline-offset:2px}
+
+/* 머리글 */
+.hero{background:var(--navy);border-radius:0;padding:26px 22px 26px}
+.hero .wordmark{font-size:40px;font-weight:800;letter-spacing:-0.045em;line-height:1;margin:22px 0 10px}
+.hero p{opacity:.72;font-size:13.5px}
+.iconBtn{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:10px;border:1px solid rgba(255,255,255,.22);background:transparent;color:#fff}
+.iconBtn svg{width:20px;height:20px}
+.heroTop{display:flex;justify-content:space-between;align-items:center}
+.heroUser{font-size:13px;opacity:.8;margin-right:10px}
+.top{height:56px;border-bottom:1px solid var(--line);background:rgba(255,255,255,.96);backdrop-filter:saturate(1.4) blur(6px)}
+.top b{font-weight:700;letter-spacing:-0.02em}
+.back{font-size:20px;color:var(--ink);border-radius:8px;padding:4px 8px}
+.title{padding:24px 20px 8px}.title h1{font-size:24px;font-weight:750;letter-spacing:-0.035em}.title p{color:var(--sub)}
+
+/* 수치 */
+.stats{gap:8px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 12px}
+.stat b{font-size:22px;font-weight:750;letter-spacing:-0.03em;font-feature-settings:"tnum" 1}
+.stat span{color:var(--sub);font-size:11.5px}
+
+/* 카드·박스 */
+.card,.group,.listItem,.tocBox{border:1px solid var(--line);border-radius:14px;background:var(--surface)}
+.card b,.group b{letter-spacing:-0.02em}
+.group b{font-size:16px}
+.tocBox{background:var(--surface)}
+.tocSubBox{background:#FAFBFC;border:1px solid var(--line2);border-radius:10px}
+.tocBoxHeader{border-bottom:1px solid var(--line2)}
+.setSummary{background:#FAFBFC}
+.sumRow{border-top:1px solid var(--line2)}
+.sumRow span{color:var(--sub)}
+.listItem.clickable:hover{background:#FAFBFC}
+.meta,.listItem small{color:var(--sub)}
+
+/* 버튼 */
+.primary,.secondary,.danger{border-radius:11px;font-weight:700;letter-spacing:-0.01em;padding:14px 16px}
+.primary{background:var(--navy);color:#fff}
+.primary:hover{background:var(--navy2)}
+.primary:disabled{background:#B7BEC9}
+.secondary{background:var(--surface);color:var(--ink);border:1px solid var(--line)}
+.secondary:hover{background:#F7F8FA}
+.danger{background:var(--surface);color:var(--red);border:1px solid #EBC9C6}
+.badge{border-radius:6px;font-weight:650;background:#F1F3F6;color:#3D4450;padding:4px 8px}
+.badge.btn{border:1px solid var(--line);background:var(--surface)}
+.badge.blue{background:var(--tint);color:var(--navy2)}
+.badge.red{background:var(--redTint);color:var(--red)}
+.badge.warn{background:var(--amberTint);color:var(--amber)}
+.badge.good{background:var(--greenTint);color:var(--green)}
+.badge.gray{background:#F1F3F6;color:#5B626D}
+.badge.btn.blue{background:var(--navy);color:#fff;border-color:var(--navy)}
+
+/* 선택 칩·세그먼트 */
+.chips button{border:1px solid var(--line);background:var(--surface);border-radius:8px;color:var(--ink)}
+.chips button:hover{background:#F7F8FA}
+.chips button.active{background:var(--navy);border-color:var(--navy);color:#fff;font-weight:650}
+.chips button small{opacity:.65}
+.segmentedControl{background:#EEF0F3;border-radius:11px}
+.segmentedControl button{font-weight:600;color:var(--sub);padding:11px 0}
+.segmentedControl button.active{color:var(--ink);box-shadow:0 1px 2px rgba(21,24,29,.08),0 0 0 1px rgba(21,24,29,.04)}
+.unitHead b{font-weight:700}
+
+/* 진행 막대·슬라이더 */
+.progress{height:5px;background:#E8EBEF}.progress span{background:var(--navy)}
+.rangeWrap input[type=range]{accent-color:var(--navy)}
+
+/* 문제 */
+.qtext{font-size:18px;line-height:1.75;letter-spacing:-0.015em;margin:16px 0 20px}
+.answer{border:1px solid var(--line);border-radius:12px;padding:14px 15px}
+.answer:hover:not(:disabled){border-color:#C9CFD8}
+.answer.sel{border:1.5px solid var(--navy);background:var(--tint)}
+.answers.oxRow{gap:10px}
+.oxBtn{display:flex;align-items:center;justify-content:center;padding:22px 10px;color:var(--ink)}
+.oxBtn svg{width:40px;height:40px}
+.oxBtn.sel{color:var(--navy)}
+.result{border-radius:14px;background:#FAFBFC;border:1px solid var(--line)}
+.result.correct{border-color:#BFDCC9;background:#F6FBF8}
+.result.wrong{border-color:#EBC9C6;background:#FDF7F6}
+.result > b{font-size:17px;letter-spacing:-0.02em}
+.result.correct > b{color:var(--green)}.result.wrong > b{color:var(--red)}
+.explain{border-top:1px solid var(--line);line-height:1.75}
+.srcLine{color:var(--faint);border-top:1px solid var(--line2)}
+.resChoice.isAns{font-weight:650;color:var(--green)}
+
+/* 알림 */
+.notice{background:#F5F6F8;color:#4F5661;border-radius:10px}
+.notice.warn{background:var(--amberTint);color:#6E4E10}
+.notice.good{background:var(--greenTint);color:#1E5E3B}
+.notice.bad{background:var(--redTint);color:#8E2A24}
+
+/* 하단 탭 */
+.bottom{height:64px;border-top:1px solid var(--line);background:rgba(255,255,255,.97);backdrop-filter:blur(6px)}
+.bottom button{background:transparent;color:var(--faint);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
+.bottom button svg{width:22px;height:22px}
+.bottom button small{margin:0;font-size:10.5px;font-weight:600}
+.bottom button.on{color:var(--navy)}
+
+/* 입력 */
+.search,.reviewBox input,.reviewBox textarea,.reviewBox select,.note input,.filterGrid select{border:1px solid var(--line);border-radius:10px}
+.search:focus,.reviewBox input:focus,.note input:focus{border-color:var(--navy2);outline:none}
+
+/* 모달 */
+.modalOverlay{background:rgba(15,20,30,.5)}
+.modalContent{border-radius:16px;box-shadow:0 18px 50px rgba(15,20,30,.25)}
+.modalHeader,.modalFooter{border-color:var(--line2)}
+.modalHeader b{font-size:16px;font-weight:700;letter-spacing:-0.02em}
+
+/* 타이머 */
+.timerBox{background:var(--redTint);border-color:#EBC9C6}
+.timerProgress span{background:var(--red)}
+.timerText{color:var(--red)}
+details{border-color:var(--line)}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+
+</style>
+</head>
+<body><div id="app"></div>
+<script>
+const SUBJECTS={
+  "민사법":["상법"]
+};
+
+const SAMPLE = [];
+
+let bank = [...SAMPLE];
+let appInfo = {title:"상법짱2026", exams:[], categoryOrder:[], version:""};
+let daily = [];
+let loaded = false, loadError = false;
+let stats = {};
+let settings = {lastSubject:null, lastIndex:{}, lastId:{}};
+let bookmarks = [];
+let notes = {};
+let masterMeta = {version:6, bookTitle:"상법짱2026", processing:{lastSourcePage:null,hasIncompleteQuestion:false,incompleteQuestionId:null}, warnings:[]};
+
+let currentUser = localStorage.getItem("law_quiz_user") || null;
+let authToken = localStorage.getItem("law_quiz_token") || null;
+// 예전 버전(토큰 없이 이름만 저장)으로 로그인돼 있던 경우 다시 로그인하도록 정리
+if(currentUser && !authToken){ currentUser = null; localStorage.removeItem("law_quiz_user"); }
+
+// 서버 요청 공통 함수 (로그인 토큰 자동 첨부)
+async function api(url, opts = {}){
+  const headers = { 'Content-Type': 'application/json', ...(opts.headers || {}) };
+  if(authToken) headers['Authorization'] = 'Bearer ' + authToken;
+  const res = await fetch(url, { ...opts, headers });
+  let data = {};
+  try { data = await res.json(); } catch(e) {}
+  if(res.status === 401 && authToken){
+    clearLogin();
+    alert("로그인이 만료되었습니다. 다시 로그인해 주세요.");
+    openAuthModal();
+  }
+  if(!res.ok) throw new Error(data.error || ("서버 오류: " + res.status));
+  return data;
+}
+function fmtDate(iso){
+  if(!iso) return "";
+  const d = new Date(iso); if(isNaN(d)) return "";
+  const p = n => String(n).padStart(2,"0");
+  return `${d.getFullYear()}.${p(d.getMonth()+1)}.${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+function editorLine(q){
+  return q && q.updatedBy ? `<div class="editorLine">최종 수정: <b>${esc(q.updatedBy)}</b> · ${esc(fmtDate(q.updatedAt))}</div>` : "";
+}
+// 수정된 문제를 문제은행과 진행 중인 퀴즈/테스트 목록에 모두 반영
+function applyQuestionUpdate(nq){
+  const sync = arr => (arr||[]).forEach(x=>{ if(x && x.id===nq.id) Object.assign(x, nq); });
+  sync(bank); sync(S.queue); sync(S.testQueue);
+  if(!bank.some(x=>x.id===nq.id)) bank.push(nq);
+}
+
+let S = {
+  screen:"home", files:[], pendingQuestions:[], pendingMetaList:[], queue:[], qi:0, selected:[], submitted:false,
+  retryPrompt:false, retrying:false, subject:null, group:null,
+  search:"", editingId:null, editDraft:null,
+  setupGroup:null, setupSubject:null, setupMode:"resume",
+  setupPath:[],
+  setupLimit:20,
+  setupOrder:"sequential",
+  setupTimerEnabled:false,
+  setupTimerSeconds:30,
+  timeLeft:30,
+  timerInterval:null,
+  bankFilter:{
+    sort:"default",
+    subject:"전체",
+    major:"전체",
+    minor:"전체",
+    detail:"전체"
+  },
+  showBankFilterModal:false,
+  showAddModal:false,
+  addDraft:null,
+  addErrors:{},
+
+  // 테스트 모드 상태
+  testSubject: "상법",
+  testGroup: "민사법",
+  testPath: [],
+  testLimit: 20,
+  testMinutes: 30,
+  testQueue: [],
+  testQi: 0,
+  testAnswers: {},
+  testTimeSpent: {},
+  testTimeLeft: 0,
+  testTimerInterval: null,
+  testCurrentEnterTime: 0,
+  testResultData: null,
+
+  // 상법짱2026
+  homeType: "ox", homeMode: "exam",
+  setupType: "ox", setupExam: null,
+  quizLabel: "", quizBack: "setupPage", returnQuiz: null,
+  testType: "ox", testScope: "all", testExam: null, testOrder: "random",
+  bankType: "all", bankLimit: 100,
+  wrongType: "all", showGraduated: false,
+  authMode: "login", authPassword2: "",
+  sel: newSel(), testSel: newSel(), keyList: [], openUnits: {},
+  bankF: {src:"", p1:"", p2:"", only:"", sort:"toc"}, qPopup: null, showSetupModal: false, showSetupPopup: false,
+  setupMode: "exam", learnMode: "resume", setupCount: null,
+
+  // 계정 모달
+  showAuthModal: false,
+  authUsername: "",
+  authPassword: "",
+  authError: ""
+};
+let dirty = false;
+
+// 서버에서 데이터 로드 (계정별 분리)
+function esc(x){return String(x??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
+function go(s){
+  stopTimer();
+  stopTestTimer();
+  S.qPopup=null; S.editingId=null;
+  S.screen=s;
+  render();
+  if(s==="settingsPage" && currentUser) loadDaily().then(()=>{ if(S.screen==="settingsPage") render(); });
+}
+// 인증 로직
+function extractCategoryPath(q, meta){
+  if(Array.isArray(q.categoryPath) && q.categoryPath.length > 0){
+    return q.categoryPath.filter(Boolean).map(x=>String(x).trim());
+  }
+  if(q.category && typeof q.category === "object"){
+    return [q.category.major, q.category.minor, q.category.detail].filter(Boolean).map(x=>String(x).trim());
+  }
+  if(typeof q.category === "string" && q.category.trim()){
+    return q.category.split(">").map(x=>x.trim()).filter(Boolean);
+  }
+  return ["기본단원"];
+}
+
+function normalizeQuestion(q,i,meta){
+  let type=q.type==="ox"?"ox":"mcq";
+  let choices=Array.isArray(q.choices)?q.choices.map(x=>String(x??"")):[];
+  let answer=String(q.answer??"").trim();
+  if(type==="ox") answer=answer.toUpperCase();
+  let categoryPath=extractCategoryPath(q, meta);
+  let category=categoryPath.join(" > ");
+
+  return {
+    id:String(q.id||("import-"+Date.now()+"-"+i)),
+    number:String(q.number??(i+1)),
+    group:String(q.group||q.subjectGroup||meta.subjectGroup||"민사법"),
+    subject:String(q.subject||meta.subject||"상법"),
+    categoryPath,
+    category,
+    type,text:String(q.text??q.question??""),
+    choices,answer,
+    explanation:String(q.explanation??""),
+    incomplete:Boolean(q.incomplete),
+    sourcePages:q.sourcePages==null?(q.source?.pages?String(q.source.pages):""):String(q.sourcePages),
+    meta:Object.assign({app:"sangbeop2026"}, (q.meta && typeof q.meta==="object") ? q.meta : {})
+  };
+}
+
+function issuesFor(nq){
+  let reasons=[];
+  if(!nq.text.trim()) reasons.push("본문 없음");
+  if(nq.type==="mcq" && !nq.choices.length) reasons.push("선지 없음");
+  if(nq.type==="ox" && !["O","X"].includes(nq.answer) && !nq.answer.includes("O") && !nq.answer.includes("X")) reasons.push("OX 정답 오류");
+  if(!nq.subject) reasons.push("과목 정보 없음");
+  return reasons;
+}
+
+function validateSingleFile(d){
+  if(!d || typeof d!=="object") throw Error("JSON 객체 형식이 아닙니다.");
+  if(!Array.isArray(d.questions)) throw Error("questions 배열이 없습니다.");
+  let meta={...d};
+  let qs=d.questions.map((q,i)=>{
+    let nq=normalizeQuestion(q,i,d);
+    nq.issues=issuesFor(nq);
+    return nq;
+  });
+  return {meta,qs};
+}
+
+function subjectMap(){
+  let map={};
+  for(const g in SUBJECTS) map[g]=[...SUBJECTS[g]];
+  for(const q of bank){
+    let g=q.group||"미분류",s=q.subject||"미분류";
+    if(!map[g]) map[g]=[];
+    if(!map[g].includes(s)) map[g].push(s);
+  }
+  return map;
+}
+
+function progress(subject){
+  let arr=bank.filter(q=>q.subject===subject);
+  let solved=arr.filter(q=>st(q.id).attempts>0).length;
+  return {n:arr.length,solved,rate:arr.length?Math.round(solved/arr.length*100):0};
+}
+
+function totals(){
+  let vals=Object.values(stats);
+  let attempted=vals.reduce((a,x)=>a+(x.attempts||0),0);
+  let wrong=vals.reduce((a,x)=>a+(x.wrong||0),0);
+  return {attempted,wrong,accuracy:attempted?Math.round((attempted-wrong)/attempted*100):0};
+}
+
+function shuffleArray(arr) {
+  let array = [...arr];
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+function matchesPath(q, path){
+  if(!path || !path.length) return true;
+  if(!q.categoryPath || !q.categoryPath.length) return false;
+  for(let i=0; i<path.length; i++){
+    if(q.categoryPath[i] !== path[i]) return false;
+  }
+  return true;
+}
+
+function isPathEqual(p1, p2){
+  if(!p1 && !p2) return true;
+  if(!p1 || !p2) return false;
+  if(p1.length !== p2.length) return false;
+  return p1.every((v,i)=>v===p2[i]);
+}
+
+function renderTocTree(tree, targetState = "setup"){
+  let topKeys = Object.keys(tree);
+  if(!topKeys.length) return `<div class="meta">등록된 목차가 없습니다.</div>`;
+
+  const curPath = targetState === "test" ? S.testPath : S.setupPath;
+
+  return topKeys.map(k1=>{
+    let node1 = tree[k1];
+    let isNode1Sel = isPathEqual(curPath, node1.path);
+    let subKeys = Object.keys(node1.children);
+
+    return `<div class="tocBox">
+      <div class="tocBoxHeader">
+        <b style="font-size:15px">${esc(node1.name)} <small style="color:#777">(${node1.count})</small></b>
+        <button class="badge btn ${isNode1Sel?'blue':''}" onclick="${targetState==='test'?'S.testPath':'S.setupPath'}=${JSON.stringify(node1.path).replace(/"/g,"'")};render()">
+          ${isNode1Sel ? "✓ 선택됨" : "중단원 전체 풀기"}
+        </button>
+      </div>
+      ${subKeys.length ? `
+        <div class="chips">
+          ${subKeys.map(k2=>{
+            let node2 = node1.children[k2];
+            let isNode2Sel = isPathEqual(curPath, node2.path);
+            let subSubKeys = Object.keys(node2.children);
+
+            if(subSubKeys.length > 0){
+              return `<div class="tocSubBox" style="width:100%">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+                  <span style="font-size:13px;font-weight:700">${esc(node2.name)} (${node2.count})</span>
+                  <button class="badge btn ${isNode2Sel?'blue':''}" onclick="${targetState==='test'?'S.testPath':'S.setupPath'}=${JSON.stringify(node2.path).replace(/"/g,"'")};render()">${isNode2Sel ? "✓ 선택됨" : "전체"}</button>
+                </div>
+                <div class="chips">
+                  ${subSubKeys.map(k3=>{
+                    let node3 = node2.children[k3];
+                    let isNode3Sel = isPathEqual(curPath, node3.path);
+                    return `<button class="${isNode3Sel?'active':''}" onclick="${targetState==='test'?'S.testPath':'S.setupPath'}=${JSON.stringify(node3.path).replace(/"/g,"'")};render()">${esc(node3.name)} <small>(${node3.count})</small></button>`;
+                  }).join("")}
+                </div>
+              </div>`;
+            } else {
+              return `<button class="${isNode2Sel?'active':''}" onclick="${targetState==='test'?'S.testPath':'S.setupPath'}=${JSON.stringify(node2.path).replace(/"/g,"'")};render()">${esc(node2.name)} <small>(${node2.count})</small></button>`;
+            }
+          }).join("")}
+        </div>
+      `:""}
+    </div>`;
+  }).join("");
+}
+
+function parseAnswerTokens(ans){
+  if(!ans) return [];
+  if(Array.isArray(ans)) return ans.map(x=>String(x).trim());
+  let s = String(ans);
+  const circled = {'①':'1','②':'2','③':'3','④':'4','⑤':'5','⑥':'6','⑦':'7','⑧':'8','⑨':'9','⑩':'10'};
+  s = s.replace(/[①②③④⑤⑥⑦⑧⑨⑩]/g, m => circled[m] || m);
+  return s.split(/[,/ ]+/).map(x=>x.trim()).filter(Boolean);
+}
+
+function checkAnswerCorrect(selected, answer){
+  let user = (Array.isArray(selected) ? selected : [selected]).map(x=>String(x).trim()).filter(Boolean).sort();
+  let corr = parseAnswerTokens(answer).sort();
+  if(!corr.length) return false;
+  if(user.length !== corr.length) return false;
+  return user.every((v, i) => v.toUpperCase() === corr[i].toUpperCase());
+}
+
+function stopTimer(){
+  if(S.timerInterval){
+    clearInterval(S.timerInterval);
+    S.timerInterval = null;
+  }
+}
+
+function startTimerIfNeeded(){
+  stopTimer();
+  if(!S.setupTimerEnabled || S.submitted || S.screen !== "quizPage") return;
+
+  S.timeLeft = S.setupTimerSeconds;
+  updateTimerUI();
+
+  S.timerInterval = setInterval(()=>{
+    S.timeLeft--;
+    updateTimerUI();
+    if(S.timeLeft <= 0){
+      stopTimer();
+      alert("제한시간이 종료되었습니다! 오답 처리됩니다.");
+      submitQ(true);
+    }
+  }, 1000);
+}
+
+function updateTimerUI(){
+  let el = document.getElementById("timerDisplay");
+  let bar = document.getElementById("timerProgressBar");
+  if(el) el.innerText = `${S.timeLeft}초`;
+  if(bar){
+    let pct = Math.max(0, (S.timeLeft / S.setupTimerSeconds) * 100);
+    bar.style.width = pct + "%";
+  }
+}
+
+function prevQ(){
+  if(S.qi > 0){
+    stopTimer();
+    S.qi--;
+    S.selected = [];
+    S.submitted = false;
+    S.retryPrompt = false;
+    S.retrying = false;
+    render();
+    startTimerIfNeeded();
+  }
+}
+
+function retryQ(){
+  S.selected=[];
+  S.submitted=false;
+  S.retryPrompt=false;
+  S.retrying=true;
+  render();
+  startTimerIfNeeded();
+}
+
+function showAns(){S.retryPrompt=false;S.submitted=true;render()}
+
+function toggleBook(id){
+  let willBook = !bookmarks.includes(id);
+  bookmarks = willBook ? [...bookmarks, id] : bookmarks.filter(x=>x!==id);
+  if(currentUser){
+    api('/api/bookmark', { method: 'POST', body: JSON.stringify({ id, isBookmarked: willBook }) }).catch(e=>console.warn(e));
+  }
+  render();
+}
+
+function setNote(id,v){
+  notes[id]=v;
+  if(currentUser){
+    api('/api/note', { method: 'POST', body: JSON.stringify({ id, note: v }) }).catch(e=>console.warn(e));
+  }
+}
+
+// ---------------- 테스트(모의고사) 모드 ----------------
+function onSelectTestSubject(sub){
+  S.testSubject = sub;
+  for(let g in SUBJECTS){
+    if(SUBJECTS[g].includes(sub)){
+      S.testGroup = g;
+      break;
+    }
+  }
+  S.testPath = [];
+  render();
+}
+
+function stopTestTimer(){
+  if(S.testTimerInterval){
+    clearInterval(S.testTimerInterval);
+    S.testTimerInterval = null;
+  }
+}
+
+function startTestTimer(){
+  stopTestTimer();
+  S.testTimerInterval = setInterval(()=>{
+    S.testTimeLeft--;
+    let el = document.getElementById("testTimerDisp");
+    if(el){
+      let m = Math.floor(S.testTimeLeft / 60);
+      let s = S.testTimeLeft % 60;
+      el.innerText = `${m}분 ${s < 10 ? '0' : ''}${s}초`;
+    }
+    if(S.testTimeLeft <= 0){
+      stopTestTimer();
+      alert("시험 시간이 종료되었습니다! 자동 채점됩니다.");
+      finishTestExam();
+    }
+  }, 1000);
+}
+
+function recordCurrentQuestionTime(){
+  if(!S.testQueue || !S.testQueue[S.testQi]) return;
+  let qId = S.testQueue[S.testQi].id;
+  let elapsed = Math.round((Date.now() - S.testCurrentEnterTime) / 1000);
+  S.testTimeSpent[qId] = (S.testTimeSpent[qId] || 0) + Math.max(1, elapsed);
+  S.testCurrentEnterTime = Date.now();
+}
+
+function moveTestQ(delta){
+  recordCurrentQuestionTime();
+  if(delta === 1 && S.testQi === S.testQueue.length - 1){
+    if(confirm("마지막 문제입니다. 시험을 종료하고 최종 채점 리포트를 확인하시겠습니까?")){
+      finishTestExam();
+      return;
+    }
+  }
+  S.testQi = Math.max(0, Math.min(S.testQueue.length - 1, S.testQi + delta));
+  render();
+}
+
+function setTestResultFilter(key, val){
+  S[key] = val;
+  let box = document.getElementById("testResultList");
+  if(box) box.innerHTML = renderTestResultItems();
+  else render();
+}
+
+function testResultPage(){
+  let res = S.testResultData;
+  if(!res || !res.items) return home();
+
+  let spentMin = Math.floor(res.totalSpentSec / 60);
+  let spentSec = res.totalSpentSec % 60;
+
+  return topBar("시험 결과 리포트", "testSetupPage") + `
+    <section class="title">
+      <h1>모의고사 채점 결과</h1>
+      <p>총 풀이 시간: ${spentMin}분 ${spentSec}초 · ${currentUser ? `[${esc(currentUser)}] 기록 반영됨` : '게스트 모드'}</p>
+    </section>
+
+    <section class="section">
+      <div class="stats">
+        <div class="stat"><b style="color:#173d2a">${res.score}점</b><span>최종 득점</span></div>
+        <div class="stat"><b style="color:#245c35">${res.correctCount}개</b><span>정답 문항</span></div>
+        <div class="stat"><b style="color:#c02b2b">${res.wrongCount}개</b><span>오답 문항</span></div>
+      </div>
+
+      <div class="resHead">
+        <b>문항별 결과 <span class="meta">(눌러서 해설 펼치기)</span></b>
+        <div class="resFilters">
+          <select onchange="setTestResultFilter('testResultView', this.value)">
+            <option value="all" ${S.testResultView==='all'?'selected':''}>전체 문제 (${res.total})</option>
+            <option value="correct" ${S.testResultView==='correct'?'selected':''}>정답 문제 (${res.correctCount})</option>
+            <option value="wrong" ${S.testResultView==='wrong'?'selected':''}>오답 문제 (${res.wrongCount})</option>
+          </select>
+          <select onchange="setTestResultFilter('testResultSort', this.value)">
+            <option value="order" ${S.testResultSort==='order'?'selected':''}>문제순</option>
+            <option value="time" ${S.testResultSort==='time'?'selected':''}>오래 걸린 순</option>
+          </select>
+        </div>
+      </div>
+      <div id="testResultList">${renderTestResultItems()}</div>
+
+      <button class="primary full" style="margin-top:24px;padding:16px" onclick="go('testSetupPage')">다른 모의고사 응시하기</button>
+    </section>
+    ${bottom()}
+  `;
+}
+
+// 문제은행 & 등록 폼
+function openAddModal(){
+  if(!requireLogin("문제 추가")) return;
+  let sMap = subjectMap();
+  let groups = Object.keys(sMap);
+  let defaultGroup = groups[0] || "공법";
+  let defaultSubj = (sMap[defaultGroup] && sMap[defaultGroup][0]) || "헌법";
+
+  S.addDraft = {
+    group: defaultGroup,
+    customGroup: "",
+    subject: defaultSubj,
+    customSubject: "",
+    customCategory: "",
+    type: "ox",
+    text: "",
+    choices: ["", "", "", ""],
+    answer: "O",
+    explanation: ""
+  };
+  S.addErrors = {};
+  S.showAddModal = true;
+  render();
+}
+function closeAddModal(){ S.showAddModal = false; render(); }
+function updateAddField(f, val){ if(S.addDraft) S.addDraft[f] = val; }
+function updateAddChoice(i, val){ if(S.addDraft) S.addDraft.choices[i] = val; }
+function addDraftChoiceItem(){ if(S.addDraft){ S.addDraft.choices.push(""); render(); } }
+function removeDraftChoiceItem(i){ if(S.addDraft){ S.addDraft.choices.splice(i, 1); render(); } }
+
+async function submitNewQuestion(){
+  let d = S.addDraft;
+  if(!d.text.trim()){ alert("문제 본문을 입력하세요."); return; }
+
+  let catPath = d.customCategory.trim() ? d.customCategory.split(">").map(x=>x.trim()).filter(Boolean) : ["기본단원"];
+  let newQ = {
+    id: "custom-" + Date.now(),
+    number: String(bank.length + 1),
+    group: d.group || "기타",
+    subject: d.subject || "헌법",
+    categoryPath: catPath,
+    category: catPath.join(" > "),
+    type: d.type,
+    text: d.text.trim(),
+    choices: d.type === "mcq" ? d.choices.map(c=>c.trim()).filter(Boolean) : [],
+    answer: d.type === "ox" ? d.answer.toUpperCase() : d.answer.trim(),
+    explanation: d.explanation.trim() || "(해설 없음)",
+    meta: {app:"sangbeop2026", source:"직접 등록한 문제"}
+  };
+
+  try {
+    const r = await api('/api/question', { method: 'POST', body: JSON.stringify(newQ) });
+    newQ.updatedBy = r.updatedBy; newQ.updatedAt = r.updatedAt;
+  } catch(e){
+    alert("등록 실패: " + e.message);
+    return;
+  }
+
+  bank.push(prepQ(newQ));
+  alert("문제가 등록되었습니다!");
+  closeAddModal();
+}
+
+function addQuestionModal(){
+  let d = S.addDraft;
+  return `<div class="modalOverlay" onclick="if(event.target===this)closeAddModal()">
+    <div class="modalContent">
+      <div class="modalHeader"><b>문제 직접 등록</b><button class="back" onclick="closeAddModal()">✕</button></div>
+      <div class="modalBody reviewBox">
+        <label>과목 선택</label>
+        <select onchange="updateAddField('subject',this.value)">
+          <option value="상법">상법</option>
+        </select>
+        <label>단원 (구분자는 ' > ' 입력)</label>
+        <input placeholder="예: 제1편 총칙 > 제2장 상인과 설비 > 제1절 상인" value="${esc(d.customCategory)}" oninput="updateAddField('customCategory',this.value)">
+        <label>유형</label>
+        <div class="segmentedControl">
+          <button class="${d.type==='ox'?'active':''}" onclick="S.addDraft.type='ox';S.addDraft.answer='O';render()">OX</button>
+          <button class="${d.type==='mcq'?'active':''}" onclick="S.addDraft.type='mcq';S.addDraft.answer='1';render()">객관식</button>
+        </div>
+        <label>문제 본문</label>
+        <textarea rows="3" placeholder="지문 입력" oninput="updateAddField('text',this.value)">${esc(d.text)}</textarea>
+        ${d.type==='mcq'?`
+          <div style="display:flex;justify-content:space-between;align-items:center;margin:10px 0 4px">
+            <label style="margin:0">선지</label>
+            <button class="badge btn" onclick="addDraftChoiceItem()">+ 선지 추가</button>
+          </div>
+          ${d.choices.map((c,i)=>`
+            <div class="row" style="margin-bottom:6px">
+              <input placeholder="선지 ${i+1}" value="${esc(c)}" oninput="updateAddChoice(${i},this.value)">
+              <button class="danger" style="flex:0" onclick="removeDraftChoiceItem(${i})">삭제</button>
+            </div>
+          `).join('')}
+          <label>정답 번호 (복수 정답: 1, 3)</label>
+          <input value="${esc(d.answer)}" oninput="updateAddField('answer',this.value)">
+        `:`
+          <label>정답</label>
+          <div class="segmentedControl">
+            <button class="${d.answer==='O'?'active':''}" onclick="updateAddField('answer','O');render()">O</button>
+            <button class="${d.answer==='X'?'active':''}" onclick="updateAddField('answer','X');render()">X</button>
+          </div>
+        `}
+        <label>해설</label>
+        <textarea rows="2" placeholder="해설" oninput="updateAddField('explanation',this.value)">${esc(d.explanation)}</textarea>
+      </div>
+      <div class="modalFooter">
+        <button class="primary full" onclick="submitNewQuestion()">서버에 등록</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function openEdit(id){
+  if(!requireLogin("문제 수정")) return;
+  let q=bank.find(x=>x.id===id) || (S.queue||[]).find(x=>x.id===id);
+  if(!q) return;
+  S.editingId=id;
+  S.editDraft={ ...q, choices:[...(q.choices||[])] };
+  render();
+}
+function closeEdit(){ S.editingId=null; S.editDraft=null; render(); }
+function updateEditField(f,v){ if(S.editDraft) S.editDraft[f]=v; }
+function updateEditChoice(i,v){ if(S.editDraft) S.editDraft.choices[i]=v; }
+async function saveEdit(){
+  let d = S.editDraft;
+  if(!d.text || !d.text.trim()){ alert("문제 본문을 입력하세요."); return; }
+  try {
+    const r = await api(`/api/question/${encodeURIComponent(d.id)}`, {
+      method: 'PUT',
+      body: JSON.stringify({
+        text: d.text.trim(),
+        answer: String(d.answer||"").trim(),
+        explanation: d.explanation || "",
+        choices: d.type === 'ox' ? [] : d.choices.map(c=>String(c).trim()).filter(Boolean)
+      })
+    });
+    applyQuestionUpdate(r.question);
+    closeEdit();
+  } catch(e){
+    alert("수정 실패: " + e.message);
+  }
+}
+async function deleteQuestion(id){
+  if(!requireLogin("문제 삭제")) return;
+  if(!confirm("문제를 삭제하시겠습니까?\n모든 사용자의 문제은행에서 삭제됩니다.")) return;
+  try {
+    await api(`/api/question/${encodeURIComponent(id)}`, { method: 'DELETE' });
+  } catch(e){
+    alert("삭제 실패: " + e.message);
+    return;
+  }
+  bank = bank.filter(x=>x.id!==id);
+  render();
+}
+
+function editForm(){
+  let d=S.editDraft;
+  return `<div class="card" style="margin-top:12px;border:2px solid #173d2a">
+    <b>문제 수정</b>
+    <p class="meta" style="margin:4px 0 0">저장하면 공용 문제은행에 바로 반영되어 모든 사용자에게 수정된 문제가 보입니다.</p>
+    ${editorLine(d)}
+    <div class="reviewBox">
+      <label>본문</label><textarea rows="3" oninput="updateEditField('text',this.value)">${esc(d.text)}</textarea>
+      ${d.type!=='ox' && d.choices && d.choices.length ? `
+        <label>선지</label>
+        ${d.choices.map((c,i)=>`<input style="margin-bottom:6px" value="${esc(c)}" oninput="updateEditChoice(${i},this.value)" placeholder="선지 ${i+1}">`).join('')}
+      ` : ''}
+      <label>정답${d.type==='ox'?' (O 또는 X)':' (복수 정답: 1, 3)'}</label><input value="${esc(d.answer)}" oninput="updateEditField('answer',this.value)">
+      <label>해설</label><textarea rows="4" oninput="updateEditField('explanation',this.value)">${esc(d.explanation)}</textarea>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <button class="primary" onclick="saveEdit()">저장</button>
+      <button class="secondary" onclick="closeEdit()">취소</button>
+    </div>
+  </div>`;
+}
+
+function importPage(){
+  return topBar("문제 파일 업로드") + `
+    <section class="section">
+      <div class="upload">
+        <div class="ico"></div>
+        <h2>JSON 파일 서버 일괄 업로드</h2>
+        <input id="jsonFiles" type="file" accept=".json,application/json" class="hidden" onchange="uploadJsonFile(this)">
+        <button class="primary" onclick="document.getElementById('jsonFiles').click()">JSON 파일 선택하기</button>
+      </div>
+    </section>
+    ${bottom()}
+  `;
+}
+
+async function uploadJsonFile(input){
+  if(!requireLogin("문제 업로드")) return;
+  let f = input.files[0];
+  if(!f) return;
+  let r = new FileReader();
+  r.onload = async () => {
+    try {
+      let d = JSON.parse(r.result);
+      let { qs } = validateSingleFile(d);
+      const data = await api('/api/import', {
+        method: 'POST',
+        body: JSON.stringify({ questions: qs })
+      });
+      alert(`성공적으로 ${data.count}문제를 서버에 병합했습니다!`);
+      await fetchBootstrap();
+      go('home');
+    } catch(e){
+      alert("업로드 실패: " + e.message);
+    }
+  };
+  r.readAsText(f);
+}
+
+// ===== 상법짱2026 =====
+// ===== 상법짱2026 공통 도우미 =====
+function isOwnQ(q){ return (q.meta && q.meta.app === "sangbeop2026") || String(q.id||"").startsWith("custom-"); }
+function prepQ(q){
+  q.meta = q.meta || {};
+  q.noAnswer = !!q.meta.noAnswer;
+  q.multi = !!q.meta.multi;
+  return q;
+}
+function typeLabel(t){ return t === "ox" ? "OX형" : "5지선다형"; }
+function examList(){
+  // 데이터에 정의된 회차 순서를 따르고, 없으면 문제에서 추출
+  let seen = {}, arr = [];
+  (appInfo.exams || []).forEach(e => { if(!seen[e.tag]){ seen[e.tag]=1; arr.push({tag:e.tag, exam:e.exam, title:e.title, type:e.type}); } });
+  bank.forEach(q => { let m=q.meta||{}; if(m.examTag && !seen[m.examTag]){ seen[m.examTag]=1; arr.push({tag:m.examTag, exam:m.exam, title:m.examTitle, type:m.examType}); } });
+  return arr;
+}
+function examTitleOf(tag){ let e = examList().find(x=>x.tag===tag); return e ? (e.title || e.exam) : tag; }
+function examShort(e){ return e.type === "변시" ? `${e.exam.slice(0,4)} 변시` : e.exam; }
+function scopeList(type, examTag){
+  return bank.filter(q => (!type || q.type === type) && (!examTag || (q.meta && q.meta.examTag === examTag)));
+}
+// 정답 판정 (정답 없음 문항은 아무 선지나 선택하면 정답 처리)
+function isCorrectQ(q, sel){
+  let arr = (Array.isArray(sel) ? sel : [sel]).filter(Boolean);
+  if(q.noAnswer) return arr.length > 0;
+  return checkAnswerCorrect(arr, q.answer);
+}
+function ansLabel(q){
+  if(q.noAnswer) return "정답 없음 (상법 개정) — 어느 선지를 골라도 정답 처리";
+  return q.answer || "(정답 미설정)";
+}
+function explainHtml(q){
+  let ex = q.explanation && q.explanation.trim() ? q.explanation : (q.meta && q.meta.explanationPending ? "해설 준비 중입니다." : "해설이 없습니다.");
+  return esc(ex);
+}
+function srcLine(q){
+  let s = q.meta && q.meta.source;
+  return s ? `<div class="srcLine">출처: ${esc(s)}</div>` : "";
+}
+function linkedOx(mcqId){ return bank.filter(x => x.type === "ox" && x.meta && x.meta.link === mcqId); }
+function kstToday(){ return new Date(Date.now() + 9*3600*1000).toISOString().slice(0,10); }
+function isGraduated(id){ let t = st(id), n = gradThreshold(); return n > 0 && t.wrong > 0 && (t.streak||0) >= n; }
+
+// 풀이 결과를 화면용 통계에 즉시 반영
+function bumpLocalStats(q, correct){
+  let x = st(q.id);
+  x = {...x};
+  x.attempts++; x.last = new Date().toISOString();
+  if(correct){ x.correct++; x.streak = (x.streak||0) + 1; } else { x.wrong++; x.streak = 0; }
+  stats[q.id] = x;
+  let today = kstToday();
+  let d = daily.find(r => r.day === today);
+  if(!d){ d = {day: today, attempts: 0, correct: 0}; daily.unshift(d); }
+  d.attempts++; if(correct) d.correct++;
+}
+function saveSettings(){
+  if(currentUser) api('/api/settings', { method:'POST', body: JSON.stringify({ settings }) }).catch(e=>console.warn(e));
+}
+async function loadDaily(){
+  if(!currentUser){ daily = []; return; }
+  try { const d = await api('/api/daily'); daily = d.days || []; } catch(e){ console.warn(e); }
+}
+function todayStat(){
+  let d = daily.find(r => r.day === kstToday()) || {attempts:0, correct:0};
+  return {attempts: d.attempts, correct: d.correct, rate: d.attempts ? Math.round(d.correct / d.attempts * 100) : 0};
+}
+
+// 출제 순서
+function orderQueue(list, order){
+  if(order === "random") return shuffleArray(list);
+  if(order === "unsolved"){
+    let a = list.filter(q => st(q.id).attempts === 0), b = list.filter(q => st(q.id).attempts > 0);
+    b.sort((x,y) => st(x.id).attempts - st(y.id).attempts);
+    return [...a, ...b];
+  }
+  if(order === "wrongfirst"){
+    let w = list.filter(q => st(q.id).wrong > 0 && !isGraduated(q.id)), r = list.filter(q => !(st(q.id).wrong > 0 && !isGraduated(q.id)));
+    w.sort((x,y) => st(y.id).wrong - st(x.id).wrong);
+    return [...w, ...r];
+  }
+  return list;
+}
+
+// 회독 현황
+function roundStats(list){
+  let n = list.length || 1;
+  let c = k => list.filter(q => st(q.id).attempts >= k).length;
+  return {n: list.length, r1: c(1), r2: c(2), r3: c(3), p1: Math.round(c(1)/n*100), p2: Math.round(c(2)/n*100), p3: Math.round(c(3)/n*100)};
+}
+function roundCard(list){
+  let r = roundStats(list);
+  return `<div class="card" style="background:#f6f8f7">
+    <b>회독 현황</b> <span class="meta">(${r.n}문제)</span>
+    ${[[1,r.r1,r.p1],[2,r.r2,r.p2],[3,r.r3,r.p3]].map(([k,cnt,p])=>`
+      <div style="display:flex;justify-content:space-between;font-size:12px;margin:8px 0 4px"><span>${k}회독</span><span>${cnt}/${r.n} (${p}%)</span></div>
+      <div class="progress"><span style="width:${p}%"></span></div>`).join('')}
+  </div>`;
+}
+
+// 목록에서 바로 풀기 (오답·북마크·OX 연결)
+function startListQuiz(list, label, back){
+  if(!list.length){ alert("풀 문제가 없습니다."); return; }
+  stopTimer();
+  S.queue = list; S.qi = 0; S.selected = []; S.submitted = false; S.retryPrompt = false; S.retrying = false;
+  S.quizLabel = label; S.quizBack = back || "home";
+  S.setupTimerEnabled = false;
+  S.screen = "quizPage";
+  render();
+}
+function startOxFromMcq(mcqId, back){
+  let list = linkedOx(mcqId);
+  if(!list.length){ alert("연결된 OX 지문이 없습니다."); return; }
+  let m = bank.find(x => x.id === mcqId);
+  startListQuiz(list, `지문 OX · ${(m && m.meta && m.meta.exam) || ''}`, back);
+}
+
+async function fetchBootstrap(){
+  try {
+    const data = await api('/api/bootstrap');
+    if (data.app) appInfo = data.app;
+    if (Array.isArray(data.bank)) {
+      bank = data.bank.filter(isOwnQ).map(prepQ);
+    }
+    stats = data.stats || {};
+    bookmarks = data.bookmarks || [];
+    notes = data.notes || {};
+    settings = Object.assign({lastSubject:null,lastIndex:{},lastId:{},gradThreshold:0}, data.settings || {});
+    settings.lastIndex = settings.lastIndex || {}; settings.lastId = settings.lastId || {};
+    loaded = true;
+    if(currentUser) await loadDaily();
+  } catch(e) {
+    console.warn("서버 연결 대기 또는 로컬 오프라인 모드:", e);
+    loadError = true;
+  } finally {
+    render();
+  }
+}
+
+function st(id){return stats[id]||{attempts:0,correct:0,wrong:0,last:null,streak:0}}
+
+function clearLogin(){
+  currentUser = null; authToken = null;
+  localStorage.removeItem("law_quiz_user"); localStorage.removeItem("law_quiz_token");
+  stats = {}; bookmarks = []; notes = {}; daily = [];
+}
+
+function authModalView(){
+  let isReg = S.authMode === "register";
+  return `<div class="modalOverlay" onclick="if(event.target===this)closeAuthModal()">
+    <div class="modalContent" style="max-width:400px">
+      <div class="modalHeader">
+        <b>${isReg ? "계정 생성" : "로그인"}</b>
+        <button class="back" onclick="closeAuthModal()">✕</button>
+      </div>
+      <div class="modalBody reviewBox">
+        <div class="segmentedControl" style="margin-top:0">
+          <button class="${!isReg?'active':''}" onclick="S.authMode='login';S.authError='';render()">로그인</button>
+          <button class="${isReg?'active':''}" onclick="S.authMode='register';S.authError='';render()">계정 생성</button>
+        </div>
+        <p class="meta">${isReg ? "새 아이디와 비밀번호를 정하세요. 생성한 계정으로만 로그인할 수 있고, 계정마다 풀이 기록·오답·북마크가 따로 저장됩니다." : "생성된 계정으로만 로그인할 수 있습니다. 계정이 없으면 [계정 생성]을 눌러 주세요."}</p>
+        <label>아이디</label>
+        <input placeholder="아이디" value="${esc(S.authUsername)}" oninput="S.authUsername=this.value">
+        <label>비밀번호${isReg?' (4자 이상)':''}</label>
+        <input type="password" placeholder="비밀번호" value="${esc(S.authPassword)}" oninput="S.authPassword=this.value">
+        ${isReg ? `<label>비밀번호 확인</label>
+        <input type="password" placeholder="비밀번호 다시 입력" value="${esc(S.authPassword2)}" oninput="S.authPassword2=this.value">` : ''}
+        ${S.authError ? `<span class="errMsg">${esc(S.authError)}</span>` : ''}
+      </div>
+      <div class="modalFooter">
+        <button class="secondary" style="flex:1" onclick="closeAuthModal()">취소</button>
+        <button class="primary" style="flex:2" onclick="submitAuth()">${isReg ? "계정 생성" : "로그인"}</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function buildTocTree(g, s, list){
+  let arr = list || bank.filter(q=>(!g||q.group===g)&&q.subject===s);
+  let root = {};
+  for(let q of arr){
+    let path = (q.categoryPath && q.categoryPath.length) ? q.categoryPath : ["기본단원"];
+    let curr = root;
+    for(let i=0; i<path.length; i++){
+      let name = path[i];
+      if(!curr[name]){
+        curr[name] = { name, count: 0, path: path.slice(0, i+1), children: {} };
+      }
+      curr[name].count++;
+      curr = curr[name].children;
+    }
+  }
+  return root;
+}
+
+function quizPage(){
+  let q=S.queue[S.qi];
+  if(!q) return home();
+  let t=st(q.id);
+  let correct = isCorrectQ(q, S.selected);
+  let pct=((S.qi+1)/S.queue.length)*100;
+  let isBinary = (q.type === "ox");
+  let isMultiAns = !isBinary && (q.multi || parseAnswerTokens(q.answer).length > 1);
+  let back = S.quizBack || "setupPage";
+  let m = q.meta || {};
+
+  if(S.editingId===q.id){
+    stopTimer();
+    return topBar("문제 수정", back)+`<section class="section">${editForm()}</section>`;
+  }
+  return `
+  <header class="top">
+    <button class="back" onclick="go('${back}')">←</button>
+    <b style="font-size:14px;max-width:42%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(S.quizLabel||"상법")}</b>
+    <div style="display:flex;gap:6px;align-items:center">
+      <button class="badge btn gray" onclick="prevQ()" title="이전 문제로 이동" ${S.qi===0?'disabled':''}>↶ 이전</button>
+      <button class="badge btn gray" onclick="passQ()" title="통계에 반영하지 않고 건너뜁니다">↷ PASS</button>
+    </div>
+  </header>
+  <section class="section">
+    <div class="progress"><span style="width:${pct}%"></span></div>
+    ${S.returnQuiz ? `<div class="notice" style="margin-top:10px">5지선다 문제의 지문을 OX로 푸는 중입니다. 끝나면 원래 문제로 돌아갑니다. <button class="badge btn" onclick="returnToMcq()">지금 돌아가기</button></div>` : ''}
+
+    ${S.setupTimerEnabled && !S.submitted ? `
+      <div class="timerBox">
+        <span style="font-size:12px;font-weight:700;color:#9b2a2a">제한시간</span>
+        <span id="timerDisplay" class="timerText">${S.timeLeft}초</span>
+      </div>
+      <div class="timerProgress">
+        <span id="timerProgressBar" style="width:${(S.timeLeft/S.setupTimerSeconds)*100}%"></span>
+      </div>
+    ` : ''}
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin:12px 0 8px">
+      <span class="meta"><b>${S.qi+1}</b> / ${S.queue.length} 문제 · 누적정답률 ${t.attempts?Math.round(t.correct/t.attempts*100):0}% (${t.attempts}회)</span>
+      <span>
+        ${currentUser ? `<button class="badge btn" onclick="openEdit('${esc(q.id)}')">수정</button>` : ''}
+        <button class="back" onclick="toggleBook('${esc(q.id)}')" title="북마크">${bookmarks.includes(q.id)?"★":"☆"}</button>
+      </span>
+    </div>
+
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
+      <span class="badge blue">${esc((q.categoryPath||[]).slice(-1)[0]||"기본단원")}</span>
+      <span class="badge">${q.type==="ox"?"OX":"5지선다"}</span>
+      ${S.setupTimerEnabled ? `<span class="badge red">${S.setupTimerSeconds}초 제한</span>` : ""}
+      ${isMultiAns ? `<span class="badge warn">모두 고르시오 (복수정답)</span>` : ""}
+      ${q.noAnswer ? `<span class="badge warn">상법 개정으로 정답 없음</span>` : ""}
+    </div>
+
+    <div class="qtext">${esc(q.text)}</div>
+
+    ${!isBinary?`<div class="meta" style="margin-bottom:8px;color:#245c35">${isMultiAns ? "정답을 모두 골라야 정답 처리됩니다." : "복수 정답 문제인 경우 선지를 여러 개 선택할 수 있습니다."}</div>`:""}
+
+    <div class="answers ${q.type==="ox"?"oxRow":""}">
+      ${q.type==="ox"
+        ?["O","X"].map(a=>{
+          let isSel = Array.isArray(S.selected) && S.selected.includes(a);
+          return `<button class="answer oxBtn ${isSel?"sel":""}" onclick="choose('${a}')" ${S.submitted?"disabled":""}>${a==="O"?ICON.o:ICON.x}</button>`;
+        }).join("")
+        :q.choices.map((c,i)=>{
+          let numStr = String(i+1);
+          let isSel = Array.isArray(S.selected) && S.selected.includes(numStr);
+          return `<button class="answer ${isSel?"sel":""}" onclick="choose('${numStr}')" ${S.submitted?"disabled":""}>
+            <div style="display:flex;align-items:flex-start;gap:10px">
+              <span class="badge ${isSel?'blue':'gray'}" style="margin-top:2px;font-size:11px;min-width:26px;text-align:center">${isSel?'✓ '+numStr:numStr}</span>
+              <span style="flex:1">${esc(c)}</span>
+            </div>
+          </button>`;
+        }).join("")}
+    </div>
+
+    ${!S.submitted && q.type!=="ox"?`<button class="primary full" onclick="submitQ()" ${(!S.selected || !S.selected.length)?"disabled":""}>정답 제출${!isBinary && S.selected.length ? ` (${S.selected.length}개 선택됨)` : ''}</button>`:""}
+
+    ${S.retryPrompt?`<div class="result wrong"><b>오답입니다.</b><p>다시 푸시겠습니까?</p><div class="row"><button class="primary" onclick="retryQ()">YES (다시 풀기)</button><button class="secondary" onclick="showAns()">NO (정답 보기)</button></div></div>`:""}
+
+    ${S.submitted&&!S.retryPrompt?`<div class="result ${correct?"correct":"wrong"}">
+      <b>${correct?"정답입니다!":"오답입니다."}</b>
+      <p style="margin:8px 0 4px">정답: <strong style="color:#173d2a;font-size:16px">${esc(ansLabel(q))}</strong></p>
+      <p style="margin:0 0 10px;font-size:13px;color:#666">내가 제출한 답: <b>${S.selected.length?esc(S.selected.join(', ')):'(선택 없음/시간초과)'}</b></p>
+      <div class="explain"><b>해설</b><p>${explainHtml(q)}</p>${editorLine(q)}${srcLine(q)}</div>
+      ${q.type!=="ox" && linkedOx(q.id).length && !S.returnQuiz ? `<button class="${correct?'secondary':'primary'} full" onclick="startOxFromMcqInQuiz('${esc(q.id)}')">이 문제 지문 ${linkedOx(q.id).length}개를 OX로 풀기</button>` : ''}
+      <button class="secondary full" onclick="openEdit('${esc(q.id)}')">문제 수정 (지문·정답·해설 오류 고치기)</button>
+      <div class="note"><b>내 메모</b><input value="${esc(notes[q.id] || "")}" placeholder="메모를 입력하세요" onchange="setNote('${esc(q.id)}',this.value)"></div>
+      <button class="primary full" onclick="nextQ()">${S.qi===S.queue.length-1?(S.returnQuiz?"원래 문제로 돌아가기":"세트 완료 (학습 종료)"):"다음 문제"}</button>
+    </div>`:""}
+  </section>`;
+}
+
+function startOxFromMcqInQuiz(mcqId){
+  stopTimer();
+  S.returnQuiz = {queue:S.queue, qi:S.qi, label:S.quizLabel, back:S.quizBack, timer:S.setupTimerEnabled};
+  let list = linkedOx(mcqId);
+  S.queue = list; S.qi = 0; S.selected = []; S.submitted = false; S.retryPrompt = false; S.retrying = false;
+  S.quizLabel = "지문 OX"; S.setupTimerEnabled = false;
+  render();
+}
+function returnToMcq(){
+  let r = S.returnQuiz; if(!r) return;
+  S.returnQuiz = null;
+  S.queue = r.queue; S.quizLabel = r.label; S.quizBack = r.back; S.setupTimerEnabled = r.timer;
+  S.qi = r.qi; S.selected = []; S.submitted = false; S.retryPrompt = false; S.retrying = false;
+  if(S.qi < S.queue.length - 1){ S.qi++; render(); startTimerIfNeeded(); }
+  else { alert("설정한 문제 세트를 모두 완수했습니다!"); go(S.quizBack === "setupPage" ? "home" : (S.quizBack || "home")); }
+}
+
+function passQ(){
+  stopTimer();
+  if(S.qi < S.queue.length - 1){
+    S.qi++;
+    S.selected = []; S.submitted = false; S.retryPrompt = false; S.retrying = false;
+    render();
+    startTimerIfNeeded();
+  }else if(S.returnQuiz){
+    returnToMcq();
+  }else{
+    alert("세트 내 문제를 모두 확인했습니다. 패스한 문제는 미풀이 상태로 보존됩니다.");
+    go("home");
+  }
+}
+
+function choose(a){
+  if(S.submitted) return;
+  let q = S.queue[S.qi];
+  if(q.type === "ox"){
+    S.selected = [String(a)];
+    submitQ();          // OX는 고르면 바로 채점
+    return;
+  } else {
+    if(!Array.isArray(S.selected)) S.selected = [];
+    let str = String(a);
+    let idx = S.selected.indexOf(str);
+    if(idx >= 0) S.selected.splice(idx, 1);
+    else { S.selected.push(str); S.selected.sort((x,y)=>parseInt(x,10)-parseInt(y,10)); }
+  }
+  render();
+}
+
+async function resetProgress(){
+  if(!currentUser){ alert("로그인된 사용자가 아닙니다."); return; }
+  if(!confirm(`[${currentUser}]님의 모든 학습기록(풀이 기록·오답·북마크·메모·날짜별 통계)을 초기화하시겠습니까?\n문제 데이터는 삭제되지 않습니다.`)) return;
+  try { await api('/api/reset-progress', { method: 'POST' }); }
+  catch(e){ alert("초기화 실패: " + e.message); return; }
+  stats = {}; settings = {lastSubject:null, lastIndex:{}, lastId:{}, gradThreshold:0};
+  bookmarks = []; notes = {}; daily = [];
+  alert("학습기록이 초기화되었습니다.");
+  render();
+}
+
+// ---------------- 테스트(모의고사) 모드 ----------------
+function testPlayPage(){
+  let q = S.testQueue[S.testQi];
+  let curAns = S.testAnswers[q.id] || [];
+  let m = Math.floor(S.testTimeLeft / 60);
+  let s = S.testTimeLeft % 60;
+  let answeredCount = Object.keys(S.testAnswers).filter(k=>(S.testAnswers[k]||[]).length).length;
+  return `
+    <header class="top">
+      <b style="font-size:15px;color:#173d2a">실전 테스트 (${q.type==='ox'?'OX':'5지선다'})</b>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span id="testTimerDisp" class="timerText" style="font-size:15px">${m}분 ${s<10?'0':''}${s}초</span>
+        <button class="badge btn red" onclick="if(confirm('시험을 종료하고 지금 바로 채점하시겠습니까?'))finishTestExam()">답안 제출</button>
+      </div>
+    </header>
+    <section class="section">
+      <div class="progress"><span style="width:${((S.testQi+1)/S.testQueue.length)*100}%"></span></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin:12px 0 8px;gap:8px">
+        <span class="meta"><b>문제 ${S.testQi+1}</b> / ${S.testQueue.length} (응답 ${answeredCount}/${S.testQueue.length})</span>
+        <span class="badge blue">${esc((q.categoryPath||[]).slice(-1)[0]||'기본단원')}</span>
+      </div>
+      ${q.multi ? `<span class="badge warn">모두 고르시오 (복수정답)</span>` : ''}
+      ${q.noAnswer ? `<span class="badge warn">상법 개정으로 정답 없음</span>` : ''}
+      <div class="qtext">${esc(q.text)}</div>
+      <div class="answers ${q.type==='ox'?'oxRow':''}">
+        ${q.type === 'ox'
+          ? ["O","X"].map(a=>{
+            let isSel = curAns.includes(a);
+            return `<button class="answer oxBtn ${isSel?'sel':''}" onclick="chooseTestAnswer('${a}')">${a==="O"?ICON.o:ICON.x}</button>`;
+          }).join('')
+          : q.choices.map((c, i)=>{
+            let numStr = String(i+1);
+            let isSel = curAns.includes(numStr);
+            return `<button class="answer ${isSel?'sel':''}" onclick="chooseTestAnswer('${numStr}')">
+              <div style="display:flex;align-items:flex-start;gap:10px">
+                <span class="badge ${isSel?'blue':'gray'}" style="min-width:26px;text-align:center">${numStr}</span>
+                <span style="flex:1">${esc(c)}</span>
+              </div>
+            </button>`;
+          }).join('')
+        }
+      </div>
+      <div class="row" style="margin-top:20px">
+        <button class="secondary" onclick="moveTestQ(-1)" ${S.testQi===0?'disabled':''}>← 이전 문제</button>
+        <button class="primary" onclick="moveTestQ(1)">
+          ${S.testQi === S.testQueue.length - 1 ? '답안 제출' : '다음 문제'}
+        </button>
+      </div>
+    </section>
+  `;
+}
+
+function chooseTestAnswer(a){
+  let q = S.testQueue[S.testQi];
+  let cur = S.testAnswers[q.id] || [];
+  if(q.type === "ox"){
+    S.testAnswers[q.id] = [String(a)];
+  } else {
+    let str = String(a);
+    let idx = cur.indexOf(str);
+    if(idx >= 0) cur.splice(idx, 1); else cur.push(str);
+    cur.sort((x,y)=>parseInt(x,10)-parseInt(y,10));
+    S.testAnswers[q.id] = cur;
+  }
+  render();
+}
+
+function finishTestExam(){
+  recordCurrentQuestionTime();
+  stopTestTimer();
+  let items = S.testQueue.map((q, idx)=>{
+    let userAns = S.testAnswers[q.id] || [];
+    let isCorr = isCorrectQ(q, userAns);
+    let spent = S.testTimeSpent[q.id] || 0;
+    bumpLocalStats(q, isCorr);
+    if(currentUser){
+      api('/api/stats', { method: 'POST', body: JSON.stringify({ id: q.id, isCorrect: isCorr }) }).catch(e=>console.warn(e));
+    }
+    return { q, idx: idx + 1, userAns, isCorr, spent };
+  });
+  let correctCount = items.filter(it=>it.isCorr).length;
+  let totalSpentSec = (S.testMinutes * 60) - Math.max(0, S.testTimeLeft);
+  S.testResultData = { total: items.length, items, correctCount, wrongCount: items.length - correctCount, totalSpentSec, score: Math.round((correctCount / items.length) * 100) };
+  S.testResultView = "all";
+  S.testResultSort = "order";
+  S.screen = "testResultPage";
+  render();
+}
+
+function renderTestResultItems(){
+  let res = S.testResultData;
+  let list = res.items.filter(it =>
+    S.testResultView === "correct" ? it.isCorr :
+    S.testResultView === "wrong" ? !it.isCorr : true
+  );
+  if(S.testResultSort === "time") list = [...list].sort((a,b)=> b.spent - a.spent || a.idx - b.idx);
+  else list = [...list].sort((a,b)=> a.idx - b.idx);
+  if(!list.length){
+    return `<div class="notice ${S.testResultView==='wrong'?'good':''}">${S.testResultView==='wrong'?'틀린 문제가 없습니다.':'해당하는 문제가 없습니다.'}</div>`;
+  }
+  return list.map(it=>{
+    let q = it.q;
+    let ansTokens = q.noAnswer ? [] : parseAnswerTokens(q.answer);
+    let choicesHtml = (q.type !== 'ox' && q.choices && q.choices.length) ? q.choices.map((c,i)=>{
+      let n = String(i+1);
+      let isAns = ansTokens.includes(n);
+      let mine = it.userAns.includes(n);
+      return `<div class="resChoice ${isAns?'isAns':''} ${mine&&!isAns&&!q.noAnswer?'isMineWrong':''}">${n}. ${esc(c)}${isAns?' ':''}${mine?' ← 내 선택':''}</div>`;
+    }).join('') : '';
+    let editing = S.editingId === q.id;
+    return `<details class="resItem ${it.isCorr?'rightItem':'wrongItem'}" ${editing?'open':''}>
+      <summary>
+        <span class="num">${it.idx}번</span>
+        <span class="badge ${it.isCorr?'good':'red'}">${it.isCorr?'정답':'오답'}</span>
+        <span class="txt">${esc(q.text)}</span>
+        <span class="sec">${it.spent}초</span>
+        <span class="chev">▶</span>
+      </summary>
+      <div class="resBody">
+        <p style="margin:10px 0 6px;white-space:pre-wrap">${esc(q.text)}</p>
+        ${choicesHtml}
+        <p style="margin:8px 0 2px;color:${it.isCorr?'#245c35':'#c02b2b'}"><b>내 답:</b> ${esc(it.userAns.join(', ') || '미선택')}</p>
+        <p style="margin:0;color:#173d2a"><b>정답:</b> ${esc(ansLabel(q))}</p>
+        <div class="explain" style="margin-top:8px;padding-top:8px"><b>해설</b><br>${explainHtml(q)}${editorLine(q)}${srcLine(q)}</div>
+        ${q.type!=='ox' && linkedOx(q.id).length ? `<button class="secondary full" onclick="startOxFromMcq('${esc(q.id)}','testResultPage')">이 문제 지문 OX로 풀기</button>` : ''}
+        ${editing ? editForm() : `<button class="secondary full" onclick="openEdit('${esc(q.id)}')">문제 수정 (지문·정답·해설 오류 고치기)</button>`}
+      </div>
+    </details>`;
+  }).join('');
+}
+
+// 문제은행 & 등록 폼
+function refreshBank(){
+  let container = document.getElementById("bankListContainer");
+  let countText = document.getElementById("bankCountText");
+  if(container) container.innerHTML = renderBankListItems();
+  if(countText) countText.innerText = `${bank.length}문제 중 ${getFilteredBankQuestions().length}문제 표시`;
+}
+function onBankSearchInput(val){
+  S.search = val; S.bankLimit = 100;
+  refreshBank();
+}
+
+function bookmarkPage(){
+  let arr=bank.filter(q=>bookmarks.includes(q.id));
+  return topBar("북마크")+`<section class="title"><h1>북마크</h1><p>${arr.length}문제</p></section><section class="section">
+  ${arr.length?`<button class="primary full" style="margin:0 0 12px" onclick="startListQuiz(bank.filter(q=>bookmarks.includes(q.id)),'북마크','bookmarkPage')">북마크 문제 풀기</button>`:''}
+  ${arr.length?arr.map(q=>`<div class="listItem">
+    <span class="badge blue">${q.type==='ox'?'OX':'5지선다'}${q.meta&&q.meta.exam?' · '+esc(q.meta.exam):''}</span>
+    <p style="white-space:pre-wrap"><b>${esc(q.text.length>300?q.text.slice(0,300)+'…':q.text)}</b></p>
+    <small>정답: ${esc(q.noAnswer?'정답 없음':q.answer)}</small>
+  </div>`).join(''):`<div class="empty">북마크한 문제가 없습니다.</div>`}
+  </section>${bottom()}`;
+}
+
+function logoutUser(){
+  if(!confirm("로그아웃 하시겠습니까?")) return;
+  api('/api/auth/logout', { method: 'POST' }).catch(()=>{});
+  clearLogin();
+  alert("로그아웃되었습니다.");
+  fetchBootstrap();
+}
+
+// ===== v2: 범위 다중 선택 · 설정 내 로그인 =====
+// 선택 상태: {exams:[회차태그...], leaves:[목차 경로 문자열...]}
+function newSel(){ return {exams:[], leaves:[]}; }
+function selOf(target){ return target === "test" ? S.testSel : S.sel; }
+function leafKey(path){ return (path && path.length ? path : ["기본단원"]).join(" > "); }
+// onclick 안에 긴 한글 경로를 넣지 않도록 번호로 바꿔 전달
+function kid(key){ let i = S.keyList.indexOf(key); if(i < 0){ S.keyList.push(key); i = S.keyList.length - 1; } return i; }
+function bankIndex(){
+  if(!S._bankIdx || S._bankIdxLen !== bank.length){
+    S._bankIdx = {}; bank.forEach((q,i)=>S._bankIdx[q.id]=i); S._bankIdxLen = bank.length;
+  }
+  return S._bankIdx;
+}
+// 선택된 범위의 문제 목록 (회차별: 회차 순서 → 목차 순서 / 단원별: 목차 순서)
+function selList(type, mode, sel){
+  let base = bank.filter(q => q.type === type);
+  if(mode === "exam"){
+    let set = new Set(sel.exams);
+    let idx = bankIndex();
+    return base.filter(q => q.meta && set.has(q.meta.examTag))
+      .sort((a,b) => ((a.meta.examOrder??99) - (b.meta.examOrder??99)) || (idx[a.id] - idx[b.id]));
+  }
+  if(mode === "unit"){
+    let set = new Set(sel.leaves);
+    return base.filter(q => set.has(leafKey(q.categoryPath)));
+  }
+  return base;
+}
+function strHash(s){ let h = 0; for(let i=0;i<s.length;i++){ h = (h*31 + s.charCodeAt(i)) | 0; } return (h>>>0).toString(36); }
+function scopeKey(){
+  let sel = S.sel, keys = S.setupMode === "exam" ? [...sel.exams].sort() : [...sel.leaves].sort();
+  return `${S.setupType}|${S.setupMode}|${strHash(keys.join("|"))}`;
+}
+function scopeLabel(){
+  let sel = S.sel, names;
+  if(S.setupMode === "exam"){
+    names = examList().filter(e => sel.exams.includes(e.tag)).map(examShort);
+  } else {
+    names = sel.leaves.map(k => k.split(" > ").slice(-1)[0]);
+  }
+  let txt = names.length <= 2 ? names.join("·") : `${names[0]} 외 ${names.length-1}개`;
+  return `${typeLabel(S.setupType)} · ${txt}`;
+}
+
+// ---------- 회차 다중 선택 ----------
+function toggleExam(target, tag){
+  let sel = selOf(target), i = sel.exams.indexOf(tag);
+  if(i >= 0) sel.exams.splice(i,1); else sel.exams.push(tag);
+  render();
+}
+function toggleExamGroup(target, type, qtype){
+  let sel = selOf(target);
+  let tags = examList().filter(e => (type === "all" || e.type === type) && bank.some(q => q.type === qtype && q.meta && q.meta.examTag === e.tag)).map(e=>e.tag);
+  let allOn = tags.length && tags.every(t => sel.exams.includes(t));
+  if(allOn) sel.exams = sel.exams.filter(t => !tags.includes(t));
+  else tags.forEach(t => { if(!sel.exams.includes(t)) sel.exams.push(t); });
+  render();
+}
+function renderExamPicker(target, qtype){
+  let sel = selOf(target), exams = examList();
+  let cnt = tag => bank.filter(q => q.type === qtype && q.meta && q.meta.examTag === tag).length;
+  let group = (type, title, sub) => {
+    let list = exams.filter(e => e.type === type && cnt(e.tag) > 0);
+    if(!list.length) return "";
+    let allOn = list.every(e => sel.exams.includes(e.tag));
+    return `<div class="tocBox">
+      <div class="tocBoxHeader">
+        <b style="font-size:15px">${title} <small style="color:#777">${sub}</small></b>
+        <button class="badge btn ${allOn?'blue':''}" onclick="toggleExamGroup('${target}','${type}','${qtype}')">${allOn?'✓ 전체 해제':'전체 선택'}</button>
+      </div>
+      <div class="chips">${list.map(e => {
+        let on = sel.exams.includes(e.tag), s = solvedCount(bank.filter(q=>q.type===qtype&&q.meta&&q.meta.examTag===e.tag));
+        return `<button class="${on?'active':''}" onclick="toggleExam('${target}','${esc(e.tag)}')">${on?'✓ ':''}${esc(examShort(e))} <small>${s}/${cnt(e.tag)}</small></button>`;
+      }).join('')}</div>
+    </div>`;
+  };
+  let all = exams.filter(e=>cnt(e.tag)>0), allOn = all.length && all.every(e=>sel.exams.includes(e.tag));
+  return `<div style="display:flex;justify-content:flex-end;margin-bottom:8px">
+      <button class="badge btn ${allOn?'blue':''}" onclick="toggleExamGroup('${target}','all','${qtype}')">${allOn?'✓ 모든 회차 해제':'모든 회차 선택'}</button>
+    </div>
+    ${group("변시", "변호사시험 기출", "UNION 기출편")}
+    ${group("모의", "법전협 모의시험", "민사법 상법 문항")}`;
+}
+function solvedCount(list){ return list.filter(q => st(q.id).attempts > 0).length; }
+
+// ---------- 목차 다중 선택 ----------
+function leavesUnder(qtype, prefix){
+  let keys = new Set();
+  bank.forEach(q => { if(q.type !== qtype) return; let k = leafKey(q.categoryPath); if(k === prefix || k.startsWith(prefix + " > ")) keys.add(k); });
+  return [...keys];
+}
+function toggleLeaf(target, id){
+  let key = S.keyList[id], sel = selOf(target), i = sel.leaves.indexOf(key);
+  if(i >= 0) sel.leaves.splice(i,1); else sel.leaves.push(key);
+  render();
+}
+function toggleNode(target, id, qtype){
+  let prefix = S.keyList[id], sel = selOf(target);
+  let keys = leavesUnder(qtype, prefix);
+  let allOn = keys.length && keys.every(k => sel.leaves.includes(k));
+  if(allOn) sel.leaves = sel.leaves.filter(k => !keys.includes(k));
+  else keys.forEach(k => { if(!sel.leaves.includes(k)) sel.leaves.push(k); });
+  render();
+}
+function toggleAllUnits(target, qtype){
+  let sel = selOf(target);
+  let keys = [...new Set(bank.filter(q=>q.type===qtype).map(q=>leafKey(q.categoryPath)))];
+  let allOn = keys.length && keys.every(k => sel.leaves.includes(k));
+  sel.leaves = allOn ? [] : keys;
+  render();
+}
+
+// ---------- 화면 ----------
+function render(){
+  let fn={home,bankPage,importPage,quizPage,wrongPage,bookmarkPage,setupPage,testSetupPage,testPlayPage,testResultPage,settingsPage}[S.screen]||home;
+  document.getElementById("app").innerHTML='<div class="app">'+fn()+'</div>';
+}
+
+// 로그인·가입은 설정 화면에서 처리
+function openAuthModal(mode){
+  S.authMode = mode || S.authMode || "login";
+  S.authError = "";
+  if(S.screen !== "settingsPage") go("settingsPage"); else render();
+}
+function closeAuthModal(){ S.authError = ""; render(); }
+function requireLogin(what){
+  if(currentUser) return true;
+  alert(`${what}은(는) 로그인한 사용자만 할 수 있습니다.\n설정 화면에서 로그인하거나 계정을 만들어 주세요.`);
+  openAuthModal("login");
+  return false;
+}
+async function submitAuth(){
+  let isReg = S.authMode === "register";
+  let nick = (S.authUsername || "").trim(), pw = S.authPassword || "";
+  if(!nick){ S.authError = "닉네임을 입력하세요."; render(); return; }
+  if(!/^\d{6}$/.test(pw)){ S.authError = "비밀번호는 숫자 6자리로 입력하세요."; render(); return; }
+  if(isReg && pw !== S.authPassword2){ S.authError = "비밀번호 확인이 일치하지 않습니다."; render(); return; }
+  try {
+    const data = await api(isReg ? '/api/auth/register' : '/api/auth/login', {
+      method: 'POST', body: JSON.stringify({ username: nick, password: pw })
+    });
+    currentUser = data.username; authToken = data.token;
+    localStorage.setItem("law_quiz_user", currentUser);
+    localStorage.setItem("law_quiz_token", authToken);
+    S.authUsername = ""; S.authPassword = ""; S.authPassword2 = ""; S.authError = "";
+    alert(isReg ? `[${currentUser}] 계정이 생성되었습니다. 바로 로그인됩니다.` : `[${currentUser}]님 로그인되었습니다.`);
+    await fetchBootstrap();
+  } catch(err){
+    S.authError = err.message; render();
+  }
+}
+function digitsOnly(el, field){ el.value = el.value.replace(/\D/g,'').slice(0,6); S[field] = el.value; }
+
+function openSetup(){
+  if(!bank.length){ alert("문제를 아직 불러오지 못했습니다. 잠시 후 다시 시도하세요."); return; }
+  if(S.setupType !== S.homeType || S.setupMode !== S.homeMode) S.sel = newSel();
+  S.setupType = S.homeType;
+  S.setupMode = S.homeMode;
+  S.setupGroup = "민사법"; S.setupSubject = "상법";
+  S.learnMode = "resume";
+  S.setupCount = null;
+  S.setupOrder = "sequential";
+  S.setupTimerEnabled = false;
+  S.setupTimerSeconds = 30;
+  S.screen = "setupPage";
+  render();
+  window.scrollTo && window.scrollTo(0,0);
+}
+
+function resumeIndex(allArr){
+  let key = scopeKey();
+  let lastId = settings.lastId[key];
+  let lastIdx = lastId ? allArr.findIndex(q=>q.id===lastId) : -1;
+  return lastIdx < 0 ? 0 : lastIdx + 1;   // 마지막으로 푼 문제의 다음부터
+}
+// 이번 세트 후보 문제
+function setupCandidates(){
+  let all = selList(S.setupType, S.setupMode, S.sel);
+  if(S.learnMode === "resume"){
+    let i = resumeIndex(all);
+    if(i >= all.length) i = 0;
+    return {all, list: all.slice(i), start: i};
+  }
+  return {all, list: all, start: 0};
+}
+// 5개 단위 문제 수 선택값 (마지막은 전체 수)
+function countSteps(n){
+  if(n <= 0) return [];
+  if(n <= 5) return [n];
+  let arr = []; for(let v = 5; v < n; v += 5) arr.push(v); arr.push(n);
+  return arr;
+}
+function currentCount(n){
+  let steps = countSteps(n); if(!steps.length) return 0;
+  let want = S.setupCount == null ? 20 : S.setupCount;
+  let best = steps[0];
+  steps.forEach(v => { if(v <= want) best = v; });
+  if(want >= n) best = n;
+  return best;
+}
+function onCountSlide(el, n){
+  let steps = countSteps(n), v = steps[parseInt(el.value,10)] || steps[steps.length-1];
+  S.setupCount = v;
+  let a = document.getElementById("countLabel"), b = document.getElementById("countLabel2");
+  if(a) a.innerText = v + "문제"; if(b) b.innerText = v + " 문제";
+}
+
+async function submitQ(isTimeout = false){
+  stopTimer();
+  let q=S.queue[S.qi];
+  let c = isTimeout ? false : isCorrectQ(q, S.selected);
+  bumpLocalStats(q, c);
+  if(!S.returnQuiz && S.quizBack === "setupPage" && S.setupOrder !== "random"){
+    settings.lastId[scopeKey()] = q.id;   // 이어 풀기 위치(순서대로 풀 때만 기록)
+  }
+  if(currentUser){
+    api('/api/stats', { method: 'POST', body: JSON.stringify({ id: q.id, isCorrect: c, settings }) }).catch(e=>console.warn(e));
+  }
+  S.submitted=true;
+  if(!c && !S.retrying && !isTimeout && q.type !== "ox") S.retryPrompt=true;   // OX는 다시 풀기 없이 바로 결과
+  render();
+}
+function nextQ(){
+  stopTimer();
+  if(S.qi<S.queue.length-1){
+    S.qi++;S.selected=[];S.submitted=false;S.retryPrompt=false;S.retrying=false;
+    render();
+    startTimerIfNeeded();
+  }else if(S.returnQuiz){
+    returnToMcq();
+  }else{
+    alert("설정한 문제 세트를 모두 완수했습니다!");
+    go(S.quizBack && S.quizBack !== "setupPage" ? S.quizBack : "setupPage");
+  }
+}
+
+// ---------- 테스트 ----------
+function testList(){
+  return selList(S.testType, S.testScope === "all" ? null : S.testScope, S.testSel);
+}
+// ---------- 설정 ----------
+function setGrad(n){
+  if(!requireLogin("오답 졸업 설정")) return;
+  settings.gradThreshold = n;
+  saveSettings();
+  render();
+}
+function gradThreshold(){ let n = parseInt(settings.gradThreshold || 0, 10) || 0; return n === 1 ? 2 : n; }
+
+function authFormHtml(){
+  let isReg = S.authMode === "register";
+  return `<div class="segmentedControl" style="margin-top:8px">
+      <button class="${!isReg?'active':''}" onclick="S.authMode='login';S.authError='';render()">로그인</button>
+      <button class="${isReg?'active':''}" onclick="S.authMode='register';S.authError='';render()">계정 만들기</button>
+    </div>
+    <div class="reviewBox">
+      <label>닉네임</label>
+      <input placeholder="닉네임" maxlength="20" value="${esc(S.authUsername||'')}" oninput="S.authUsername=this.value">
+      <label>비밀번호 (숫자 6자리)</label>
+      <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="숫자 6자리" value="${esc(S.authPassword||'')}" oninput="digitsOnly(this,'authPassword')">
+      ${isReg ? `<label>비밀번호 확인</label>
+      <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="숫자 6자리 다시 입력" value="${esc(S.authPassword2||'')}" oninput="digitsOnly(this,'authPassword2')">` : ''}
+      ${S.authError ? `<span class="errMsg">${esc(S.authError)}</span>` : ''}
+    </div>
+    <p class="meta" style="margin:8px 0 0">${isReg ? "계정을 만들면 바로 로그인되고, 풀이 기록·오답·북마크가 이 계정에 저장됩니다." : "만들어 둔 계정으로만 로그인할 수 있습니다. 처음이면 [계정 만들기]를 누르세요."}</p>
+    <button class="primary full" onclick="submitAuth()">${isReg ? "계정 만들기" : "로그인"}</button>`;
+}
+
+function settingsPage(){
+  let td = todayStat(), n = gradThreshold();
+  let recent = daily.slice(0, 14);
+  return topBar("설정")+`<section class="title"><h1>설정</h1><p>계정 · 오늘의 학습 · 오답 졸업</p></section>
+  <section class="section">
+    <div class="card">
+      <b>계정</b>
+      ${currentUser ? `
+        <p class="meta" style="margin:6px 0 10px"><b>${esc(currentUser)}</b> 계정으로 로그인되어 있습니다. 풀이 기록은 이 계정에만 저장됩니다.</p>
+        <button class="secondary full" onclick="logoutUser()">로그아웃</button>
+      ` : authFormHtml()}
+    </div>
+
+    <div class="card">
+      <b>오늘의 학습</b> <span class="meta">(${kstToday()} · 한국시간 기준)</span>
+      <div class="stats" style="margin-top:10px">
+        <div class="stat"><b>${td.attempts}</b><span>푼 문제</span></div>
+        <div class="stat"><b>${td.correct}</b><span>맞힌 문제</span></div>
+        <div class="stat"><b>${td.rate}%</b><span>정답률</span></div>
+      </div>
+      ${currentUser ? (recent.length ? `<details open><summary>최근 날짜별 기록</summary>
+        <div style="margin-top:8px">${recent.map(d=>`<div style="display:flex;justify-content:space-between;font-size:13px;padding:6px 2px;border-bottom:1px solid #f0f2f1">
+          <span>${esc(d.day)}</span><span>${d.attempts}문제 · ${d.correct}개 정답 · <b>${d.attempts?Math.round(d.correct/d.attempts*100):0}%</b></span></div>`).join('')}</div>
+      </details>` : `<p class="meta">아직 풀이 기록이 없습니다.</p>`) : `<p class="meta">로그인하면 날짜별 풀이 수와 정답률이 저장됩니다.</p>`}
+    </div>
+
+    <div class="card">
+      <b>오답 졸업</b>
+      <p class="meta" style="margin:6px 0 0">틀린 문제를 정해진 횟수만큼 <b>연속으로</b> 맞히면 오답노트에서 숨깁니다. 틀린 횟수 기록은 그대로 남고, 졸업한 문제도 [졸업한 문제 보기]에서 볼 수 있습니다. 다시 틀리면 오답노트로 돌아옵니다.</p>
+      <div class="chips">
+        ${[0,2,3,4,5].map(k=>`<button class="${n===k?'active':''}" onclick="setGrad(${k})">${k===0?'사용 안 함':`연속 ${k}회 정답`}</button>`).join('')}
+      </div>
+    </div>
+
+    <div class="card">
+      <b>문제 데이터</b>
+      <p class="meta" style="margin:6px 0 0">OX ${bank.filter(q=>q.type==='ox').length}문제 · 5지선다 ${bank.filter(q=>q.type==='mcq').length}문제 · 데이터 버전 ${esc(appInfo.version||'-')}</p>
+      <p class="meta" style="margin:4px 0 0">변시 기출: 2027 대비 UNION 상법 선택형 기출문제집 기출편 / 모의: 법전협 모의시험(2024~2026) 민사법 선택형 상법 문항</p>
+      ${currentUser ? `<button class="secondary full" onclick="go('importPage')">추가 문제 JSON 업로드 (관리용)</button>` : ''}
+    </div>
+
+    ${currentUser ? `<button class="danger full" onclick="resetProgress()">[${esc(currentUser)}] 계정 학습기록 초기화</button>` : ''}
+  </section>
+  ${bottom()}`;
+}
+
+// ===== v3: 목차 접기 · 문제은행 정렬 도구 · 오답 팝업 =====
+
+// ---------- 목차 선택: 대단원(편) 기준 접기 ----------
+function toggleUnitOpen(target, id){
+  let name = S.keyList[id], key = target + "|" + name;
+  S.openUnits[key] = !S.openUnits[key];
+  render();
+}
+function renderUnitPicker(target, qtype){
+  let sel = selOf(target);
+  let base = bank.filter(q => q.type === qtype);
+  let tree = buildTocTree(null, null, base);
+  let selected = new Set(sel.leaves);
+  let nodeState = node => {
+    let keys = leavesUnder(qtype, leafKey(node.path));
+    let on = keys.filter(k => selected.has(k)).length;
+    return {all: keys.length > 0 && on === keys.length, on, total: keys.length};
+  };
+  let chip = node => {
+    let k = leafKey(node.path), on = selected.has(k);
+    return `<button class="${on?'active':''}" onclick="toggleLeaf('${target}',${kid(k)})">${on?'✓ ':''}${esc(node.name)} <small>(${node.count})</small></button>`;
+  };
+  let every = Object.keys(tree).length > 0 && Object.keys(tree).every(k => nodeState(tree[k]).all);
+  return `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <span class="meta">대단원을 누르면 펼쳐집니다.</span>
+      <button class="badge btn ${every?'blue':''}" onclick="toggleAllUnits('${target}','${qtype}')">${every?'✓ 전체 단원 해제':'전체 단원 선택'}</button>
+    </div>` + Object.keys(tree).map(k1 => {
+    let n1 = tree[k1], s1 = nodeState(n1);
+    let open = !!S.openUnits[target + "|" + n1.name];
+    return `<div class="tocBox" style="padding:10px 12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+        <button class="unitHead" onclick="toggleUnitOpen('${target}',${kid(n1.name)})">
+          <span class="chev2">${open?'▼':'▶'}</span>
+          <b>${esc(n1.name)}</b>
+          <small style="color:#777">${n1.count}문제${s1.on?` · <span style="color:#173d2a;font-weight:700">${s1.all?'전체':s1.on+'개 단원'} 선택</span>`:''}</small>
+        </button>
+        <button class="badge btn ${s1.all?'blue':''}" style="white-space:nowrap" onclick="toggleNode('${target}',${kid(leafKey(n1.path))},'${qtype}')">${s1.all?'✓ 전체 해제':'전체 선택'}</button>
+      </div>
+      ${open ? `<div class="chips" style="margin-top:10px">
+        ${Object.keys(n1.children).map(k2 => {
+          let n2 = n1.children[k2];
+          let kids = Object.keys(n2.children);
+          if(!kids.length) return chip(n2);
+          let s2 = nodeState(n2);
+          return `<div class="tocSubBox" style="width:100%">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;gap:6px">
+              <span style="font-size:13px;font-weight:700">${esc(n2.name)} (${n2.count})</span>
+              <button class="badge btn ${s2.all?'blue':''}" onclick="toggleNode('${target}',${kid(leafKey(n2.path))},'${qtype}')">${s2.all?'✓ 해제':'전체 선택'}</button>
+            </div>
+            <div class="chips">${kids.map(k3 => chip(n2.children[k3])).join('')}</div>
+          </div>`;
+        }).join('')}
+      </div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+// ---------- 문제은행: 수정용 + 정렬·필터 도구 ----------
+function bankTopUnits(){
+  let tree = buildTocTree(null, null, bank.filter(q => S.bankType === "all" || q.type === S.bankType));
+  return tree;
+}
+function getFilteredBankQuestions(){
+  let F = S.bankF;
+  let idx = bankIndex();
+  let qList = bank.filter(q=>{
+    let m = q.meta || {};
+    if(S.bankType !== "all" && q.type !== S.bankType) return false;
+    if(F.src === "변시" && m.examType !== "변시") return false;
+    if(F.src === "모의" && m.examType !== "모의") return false;
+    if(F.src && F.src !== "변시" && F.src !== "모의" && m.examTag !== F.src) return false;
+    if(F.p1 && (q.categoryPath||[])[0] !== F.p1) return false;
+    if(F.p2 && (q.categoryPath||[])[1] !== F.p2) return false;
+    if(F.only === "edited" && !q.updatedBy) return false;
+    if(F.only === "wrong" && !(st(q.id).wrong > 0)) return false;
+    if(F.only === "unsolved" && st(q.id).attempts > 0) return false;
+    if(F.only === "bookmark" && !bookmarks.includes(q.id)) return false;
+    if(F.only === "nopending" && !(m.explanationPending)) return false;
+    if(S.search){
+      let hay = (`${q.text} ${q.category} ${m.exam||''} ${m.examTitle||''} ${m.source||''} ${(q.choices||[]).join(' ')} ${q.explanation||''}`).toLowerCase();
+      let words = S.search.toLowerCase().split(/\s+/).filter(Boolean);
+      if(!words.every(w => hay.includes(w))) return false;
+    }
+    return true;
+  });
+  let rate = q => { let s = st(q.id); return s.attempts ? s.correct/s.attempts : 1; };
+  let cmp = {
+    toc: (a,b) => idx[a.id] - idx[b.id],
+    exam: (a,b) => ((a.meta?.examOrder??99) - (b.meta?.examOrder??99)) || ((a.meta?.qno||0) - (b.meta?.qno||0)) || (idx[a.id]-idx[b.id]),
+    examDesc: (a,b) => ((b.meta?.examOrder??-1) - (a.meta?.examOrder??-1)) || (idx[a.id]-idx[b.id]),
+    wrong: (a,b) => st(b.id).wrong - st(a.id).wrong || (idx[a.id]-idx[b.id]),
+    rate: (a,b) => rate(a) - rate(b) || (idx[a.id]-idx[b.id]),
+    edited: (a,b) => String(b.updatedAt||'').localeCompare(String(a.updatedAt||'')) || (idx[a.id]-idx[b.id])
+  }[F.sort] || ((a,b)=>idx[a.id]-idx[b.id]);
+  return qList.sort(cmp);
+}
+function setBankF(k, v){
+  S.bankF[k] = v;
+  if(k === "p1") S.bankF.p2 = "";
+  S.bankLimit = 100;
+  render();
+}
+function renderBankListItems(){
+  let filtered = getFilteredBankQuestions();
+  if(!filtered.length) return `<div class="empty">조건에 해당하는 문제가 없습니다.</div>`;
+  let shown = filtered.slice(0, S.bankLimit);
+  return shown.map(q=>{
+    if(S.editingId===q.id) return `<div class="listItem">${editForm()}</div>`;
+    let t=st(q.id), m=q.meta||{};
+    return `<div class="listItem">
+      <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:6px;align-items:center">
+        <span class="badge">${q.type==='ox'?'OX':'5지선다'}</span>
+        ${m.exam?`<span class="badge ${m.examType==='변시'?'warn':'good'}">${esc(m.exam)}${m.qno&&q.type!=='ox'?' '+m.qno+'번':''}</span>`:''}
+        <span class="badge blue">${esc((q.categoryPath||[]).slice(-1)[0]||"기본단원")}</span>
+        ${q.updatedBy?`<span class="badge gray">수정됨</span>`:''}
+        <span style="margin-left:auto"></span>
+        <button class="badge btn" onclick="openEdit('${esc(q.id)}')">수정</button>
+      </div>
+      <p style="white-space:pre-wrap;margin:6px 0"><b>${esc(q.text.length>400?q.text.slice(0,400)+'…':q.text)}</b></p>
+      ${q.type!=='ox' ? `<div class="meta" style="white-space:pre-wrap">${(q.choices||[]).map((c,i)=>`${i+1}. ${esc(c.length>80?c.slice(0,80)+'…':c)}`).join('\n')}</div>` : ''}
+      <div style="font-size:13px;margin-top:6px">정답: <b style="color:#173d2a">${esc(q.noAnswer?'정답 없음':q.answer)}</b></div>
+      <small>풀이 ${t.attempts}회 · 오답 ${t.wrong}회 · 정답률 ${t.attempts?Math.round(t.correct/t.attempts*100):0}% ${bookmarks.includes(q.id)?"· ":""}</small>
+      ${editorLine(q)}
+      ${currentUser ? `<div style="text-align:right;margin-top:6px"><button class="badge btn red" onclick="deleteQuestion('${esc(q.id)}')">삭제</button></div>` : ''}
+    </div>`;
+  }).join("") + (filtered.length > shown.length ? `<button class="secondary full" onclick="S.bankLimit+=100;refreshBank()">더 보기 (${filtered.length - shown.length}문제 남음)</button>` : '');
+}
+function bankPage(){
+  let filtered = getFilteredBankQuestions();
+  let F = S.bankF, exams = examList(), tree = bankTopUnits();
+  let p2opts = F.p1 && tree[F.p1] ? Object.keys(tree[F.p1].children) : [];
+  let sel = (k, opts, cur) => `<select onchange="setBankF('${k}', this.value)">${opts.map(([v,n])=>`<option value="${esc(v)}" ${cur===v?'selected':''}>${esc(n)}</option>`).join('')}</select>`;
+  return topBar("문제은행")+`
+  <section class="title" style="display:flex;justify-content:space-between;align-items:flex-end">
+    <div>
+      <h1>문제은행 · 수정</h1>
+      <p id="bankCountText">${bank.length}문제 중 ${filtered.length}문제 표시</p>
+      ${!currentUser ? `<p class="meta" style="margin-top:4px">문제 수정·추가·삭제는 로그인 후 가능합니다.</p>` : ''}
+    </div>
+    <button class="primary" style="padding:10px 15px;font-size:14px;border-radius:12px;white-space:nowrap" onclick="openAddModal()">문제 추가</button>
+  </section>
+  <section class="section">
+    <div class="segmentedControl" style="margin:0 0 10px">
+      ${[["all","전체"],["ox","OX"],["mcq","5지선다"]].map(([k,n])=>`<button class="${S.bankType===k?'active':''}" onclick="S.bankType='${k}';S.bankF.p1='';S.bankF.p2='';S.bankLimit=100;render()">${n}</button>`).join('')}
+    </div>
+    <input id="bankSearchInput" class="search" style="margin-bottom:10px" placeholder="검색 (지문·선지·해설·출처, 예: 영업양도 2018 변시)" value="${esc(S.search)}" oninput="onBankSearchInput(this.value)">
+    <div class="filterGrid">
+      <label>출처${sel('src', [["","전체 출처"],["변시","변시 기출 전체"],["모의","법전협 모의 전체"],...exams.map(e=>[e.tag, examShort(e)])], F.src)}</label>
+      <label>정렬${sel('sort', [["toc","목차순"],["exam","회차순(오래된 순)"],["examDesc","회차순(최신 순)"],["wrong","오답 많은 순"],["rate","정답률 낮은 순"],["edited","최근 수정 순"]], F.sort)}</label>
+      <label>대단원${sel('p1', [["","전체 대단원"],...Object.keys(tree).map(k=>[k,k])], F.p1)}</label>
+      <label>중단원${sel('p2', [["","전체 중단원"],...p2opts.map(k=>[k,k])], F.p2)}</label>
+      <label style="grid-column:1/-1">보기${sel('only', [["","전체 문제"],["edited","수정된 문제만"],["wrong","틀린 적 있는 문제"],["unsolved","안 푼 문제"],["bookmark","북마크한 문제"],["nopending","해설 없는 문제"]], F.only)}</label>
+    </div>
+    ${(F.src||F.p1||F.p2||F.only||S.search||F.sort!=='toc') ? `<button class="badge btn" style="margin-bottom:10px" onclick="S.bankF={src:'',p1:'',p2:'',only:'',sort:'toc'};S.search='';S.bankLimit=100;render()">↺ 조건 초기화</button>` : ''}
+    <div id="bankListContainer">
+      ${renderBankListItems()}
+    </div>
+  </section>
+  ${bottom()}
+  ${S.showAddModal ? addQuestionModal() : ''}
+  `;
+}
+
+// ---------- 오답노트: 문제 클릭 → 팝업 ----------
+function openQPopup(id){ S.qPopup = id; S.editingId = null; render(); }
+function closeQPopup(){ S.qPopup = null; S.editingId = null; S.editDraft = null; render(); }
+function qPopupView(){
+  let q = bank.find(x => x.id === S.qPopup);
+  if(!q) return "";
+  let t = st(q.id), m = q.meta || {};
+  let ans = q.noAnswer ? [] : parseAnswerTokens(q.answer);
+  let editing = S.editingId === q.id;
+  return `<div class="modalOverlay" onclick="if(event.target===this)closeQPopup()">
+    <div class="modalContent">
+      <div class="modalHeader">
+        <b>${q.type==='ox'?'OX':'5지선다'} ${m.exam?'· '+esc(m.exam):''}</b>
+        <div style="display:flex;gap:6px;align-items:center">
+          ${editing ? '' : `<button class="badge btn" onclick="openEdit('${esc(q.id)}')">수정</button>`}
+          <button class="back" onclick="closeQPopup()">✕</button>
+        </div>
+      </div>
+      <div class="modalBody">
+        ${editing ? editForm() : `
+          <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px">
+            <span class="badge blue">${esc(q.category||'기본단원')}</span>
+            ${q.multi?'<span class="badge warn">모두 고르시오</span>':''}
+            ${q.noAnswer?'<span class="badge warn">상법 개정으로 정답 없음</span>':''}
+          </div>
+          <div style="white-space:pre-wrap;line-height:1.65;font-size:15px">${esc(q.text)}</div>
+          ${q.type!=='ox' ? (q.choices||[]).map((c,i)=>{ let n=String(i+1), isA=ans.includes(n);
+            return `<div class="resChoice ${isA?'isAns':''}">${n}. ${esc(c)}${isA?' ':''}</div>`; }).join('') : ''}
+          <p style="margin:12px 0 4px">정답: <strong style="color:#173d2a;font-size:16px">${esc(ansLabel(q))}</strong></p>
+          <p class="meta" style="margin:0">오답 ${t.wrong}회 · 풀이 ${t.attempts}회 · 연속 정답 ${t.streak||0}회${isGraduated(q.id)?' · 졸업':''}</p>
+          <div class="explain"><b>해설</b><p>${explainHtml(q)}</p>${editorLine(q)}${srcLine(q)}</div>
+          <div class="note"><b>내 메모</b><input value="${esc(notes[q.id] || "")}" placeholder="메모를 입력하세요" onchange="setNote('${esc(q.id)}',this.value)"></div>
+        `}
+      </div>
+    </div>
+  </div>`;
+}
+function wrongPage(){
+  let all = bank.filter(q=>st(q.id).wrong>0 && (S.wrongType==='all' || q.type===S.wrongType));
+  let grads = all.filter(q=>isGraduated(q.id));
+  let active = all.filter(q=>!isGraduated(q.id));
+  let arr = (S.showGraduated ? grads : active).slice().sort((a,b)=>st(b.id).wrong - st(a.id).wrong);
+  let n = gradThreshold();
+  return topBar("오답노트")+`<section class="title"><h1>오답노트</h1>
+    <p>남은 오답 ${active.length}문제${n?` · 졸업 ${grads.length}문제 (연속 ${n}회 정답 시 졸업)`:' · 오답 졸업 사용 안 함'} · 문제를 누르면 정답·해설이 열립니다</p></section>
+  <section class="section">
+    <div class="segmentedControl" style="margin:0 0 10px">
+      ${[["all","전체"],["ox","OX"],["mcq","5지선다"]].map(([k,nm])=>`<button class="${S.wrongType===k?'active':''}" onclick="S.wrongType='${k}';render()">${nm}</button>`).join('')}
+    </div>
+    ${n ? `<button class="secondary full" style="margin:0 0 12px" onclick="S.showGraduated=!S.showGraduated;render()">${S.showGraduated?'남은 오답 보기':'졸업한 문제 보기'}</button>` : ''}
+  ${arr.length?arr.map(q=>{ let t=st(q.id); return `<div class="listItem clickable" onclick="openQPopup('${esc(q.id)}')">
+    <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:6px">
+      <span class="badge red">${q.type==='ox'?'OX':'5지선다'}</span>
+      ${q.meta&&q.meta.exam?`<span class="badge gray">${esc(q.meta.exam)}</span>`:''}
+      ${isGraduated(q.id)?`<span class="badge good">졸업</span>`:''}
+      ${notes[q.id]?`<span class="badge blue">메모</span>`:''}
+    </div>
+    <p style="white-space:pre-wrap;margin:6px 0"><b>${esc(q.text.length>220?q.text.slice(0,220)+'…':q.text)}</b></p>
+    <small>오답 ${t.wrong}회 · 연속 정답 ${t.streak||0}회</small>
+  </div>`;}).join(''):`<div class="empty">${S.showGraduated?'졸업한 문제가 없습니다.':'오답이 없습니다.'}</div>`}
+  </section>${bottom()}${S.qPopup ? qPopupView() : ''}`;
+}
+
+// ===== v4: 설정 요약·팝업, 홈 이어서 풀기, 테스트 랜덤 고정 =====
+function timerLabel(on, sec){ return on ? `문제당 ${sec}초` : "시간 제한 없음"; }
+
+// 마지막 학습 세션 저장 (로그인: 서버 설정, 비로그인: 이 브라우저)
+function saveLastSession(){
+  let ls = {type:S.setupType, mode:S.setupMode, sel:{exams:[...S.sel.exams], leaves:[...S.sel.leaves]},
+            count:S.setupCount, timerEnabled:S.setupTimerEnabled, timerSeconds:S.setupTimerSeconds, at:new Date().toISOString()};
+  settings.lastSession = ls;
+  try { localStorage.setItem("sbj_lastSession", JSON.stringify(ls)); } catch(e){}
+  saveSettings();
+}
+function getLastSession(){
+  if(settings.lastSession) return settings.lastSession;
+  try { let v = localStorage.getItem("sbj_lastSession"); return v ? JSON.parse(v) : null; } catch(e){ return null; }
+}
+function applySession(ls){
+  S.setupType = ls.type; S.setupMode = ls.mode;
+  S.homeType = ls.type; S.homeMode = ls.mode;
+  S.sel = {exams:[...(ls.sel?.exams||[])], leaves:[...(ls.sel?.leaves||[])]};
+  S.setupCount = ls.count; S.setupTimerEnabled = !!ls.timerEnabled; S.setupTimerSeconds = ls.timerSeconds || 30;
+  S.learnMode = "resume"; S.setupOrder = "sequential";
+  S.setupGroup = "민사법"; S.setupSubject = "상법";
+}
+// 홈 화면에 보여 줄 이어서 풀기 정보
+function resumeInfo(){
+  let ls = getLastSession(); if(!ls || !bank.length) return null;
+  let keep = {type:S.setupType, mode:S.setupMode, sel:S.sel, lm:S.learnMode, cnt:S.setupCount, te:S.setupTimerEnabled, ts:S.setupTimerSeconds};
+  applySession(ls);
+  let c = setupCandidates();
+  let info = null;
+  if(c.all.length){
+    let cnt = currentCount(c.list.length);
+    info = {label: scopeLabel(), start: c.start + 1, total: c.all.length, cnt, timer: timerLabel(S.setupTimerEnabled, S.setupTimerSeconds), fresh: c.start === 0};
+  }
+  S.setupType=keep.type; S.setupMode=keep.mode; S.sel=keep.sel; S.learnMode=keep.lm; S.setupCount=keep.cnt; S.setupTimerEnabled=keep.te; S.setupTimerSeconds=keep.ts;
+  return info;
+}
+function resumeLast(){
+  let ls = getLastSession();
+  if(!ls){ alert("이어서 풀 기록이 없습니다. 아래에서 범위를 골라 시작하세요."); return; }
+  applySession(ls);
+  startCustomQuiz();
+}
+
+function home(){
+  let t=totals(), td=todayStat();
+  let type = S.homeType, mode = S.homeMode;
+  let typeCount = tp => bank.filter(q=>q.type===tp).length;
+  let ri = loaded ? resumeInfo() : null;
+  return `<section class="hero">
+    <div class="heroTop">
+      <span style="font-size:13px;font-weight:600;opacity:.75">변호사시험 · 법전협 모의 상법 문제은행</span>
+      <span style="display:flex;align-items:center">${currentUser?`<span class="heroUser">${esc(currentUser)}</span>`:''}<button class="iconBtn" aria-label="설정" onclick="go('settingsPage')">${ICON.gear}</button></span>
+    </div>
+    <div class="wordmark">상법짱2026</div>
+    <p>기출 2012–2026 · 모의 2024–2026 · OX ${typeCount('ox')}문항 · 5지선다 ${typeCount('mcq')}문항</p>
+  </section>
+
+  ${!currentUser ? `<section class="section"><div class="notice warn">로그인하지 않으면 풀이 기록(오늘 정답률·오답노트·북마크)이 저장되지 않습니다. <a href="#" onclick="go('settingsPage');return false">로그인하기</a></div></section>` : ''}
+  ${loadError && !loaded ? `<section class="section"><div class="notice bad">서버에서 문제를 불러오지 못했습니다. 잠시 후 새로고침해 주세요.</div></section>` : ''}
+  ${!loaded && !loadError ? `<section class="section"><div class="notice">문제를 불러오는 중입니다… (서버가 잠들어 있으면 1분 정도 걸릴 수 있어요)</div></section>` : ''}
+
+  <section class="section">
+    <div class="stats">
+      <div class="stat"><b>${td.attempts}</b><span>오늘 푼 문제</span></div>
+      <div class="stat"><b>${td.rate}%</b><span>오늘 정답률</span></div>
+      <div class="stat"><b>${t.accuracy}%</b><span>누적 정답률 (${t.attempted}회)</span></div>
+    </div>
+  </section>
+
+  ${ri ? `<section class="section">
+    <button class="primary full" style="margin:0;padding:16px;font-size:16px" onclick="resumeLast()">이어서 풀기</button>
+    <div class="meta" style="margin:8px 4px 0;line-height:1.6">
+      ${esc(ri.label)} · ${ri.fresh ? '처음 문제부터' : `${ri.start}번째 문제부터`} (전체 ${ri.total}문제)<br>
+      ${ri.cnt}문제 · ${ri.timer}
+    </div>
+  </section>` : ''}
+
+  <section class="section">
+    <div class="card">
+      <b>문제 유형</b>
+      <div class="segmentedControl">
+        <button class="${type==='ox'?'active':''}" onclick="S.homeType='ox';render()">OX형 <small>(${typeCount('ox')})</small></button>
+        <button class="${type==='mcq'?'active':''}" onclick="S.homeType='mcq';render()">5지선다형 <small>(${typeCount('mcq')})</small></button>
+      </div>
+      <div style="margin-top:16px"><b>출제 방식</b></div>
+      <div class="segmentedControl">
+        <button class="${mode==='exam'?'active':''}" onclick="S.homeMode='exam';render()">회차별</button>
+        <button class="${mode==='unit'?'active':''}" onclick="S.homeMode='unit';render()">단원별</button>
+      </div>
+      <button class="secondary full" style="margin-top:16px;padding:14px;font-size:15px" onclick="openSetup()">범위 선택하기</button>
+    </div>
+  </section>
+  ${bottom()}`;
+}
+
+// ---------- 학습 설정: 요약 박스 + 변경 팝업 ----------
+function setupSettingsModal(){
+  let c = setupCandidates(), n = c.list.length;
+  let steps = countSteps(n), cnt = currentCount(n), idx = Math.max(0, steps.indexOf(cnt));
+  return `<div class="modalOverlay" onclick="if(event.target===this){S.showSetupModal=false;render()}">
+    <div class="modalContent" style="max-width:440px">
+      <div class="modalHeader"><b>풀이 설정 변경</b><button class="back" onclick="S.showSetupModal=false;render()">✕</button></div>
+      <div class="modalBody">
+        <b>학습 방식</b>
+        <div class="segmentedControl">
+          <button class="${S.learnMode==='resume'?'active':''}" onclick="S.learnMode='resume';render()">이어 풀기</button>
+          <button class="${S.learnMode==='restart'?'active':''}" onclick="S.learnMode='restart';render()">처음부터</button>
+        </div>
+        <p class="meta" style="margin:6px 2px 0">${S.learnMode==='resume' ? (c.start>0 ? `지난번에 푼 곳 다음(${c.start+1}번째 문제)부터 이어서 풉니다.` : `처음 푸는 범위이거나 끝까지 풀어서 첫 문제부터 시작합니다.`) : `선택한 범위의 첫 문제부터 다시 풉니다.`}</p>
+
+        <div style="margin-top:20px;display:flex;justify-content:space-between;align-items:center">
+          <b>1회 풀이 문제량</b><b id="countLabel" style="color:#173d2a;font-size:18px">${cnt}문제</b>
+        </div>
+        <div class="rangeWrap">
+          <input type="range" min="0" max="${Math.max(0,steps.length-1)}" step="1" value="${idx}" ${steps.length<=1?'disabled':''} oninput="onCountSlide(this, ${n})">
+          <div style="display:flex;justify-content:space-between" class="meta"><span>${steps[0]||0}</span><span>최대 ${n}문제</span></div>
+        </div>
+
+        <div style="margin-top:16px"><b>문제당 제한 시간</b></div>
+        <div class="segmentedControl">
+          <button class="${!S.setupTimerEnabled?'active':''}" onclick="S.setupTimerEnabled=false;render()">제한 없음</button>
+          <button class="${S.setupTimerEnabled?'active':''}" onclick="S.setupTimerEnabled=true;render()">제한 있음</button>
+        </div>
+        ${S.setupTimerEnabled ? `<div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px">
+            <span class="meta">문제당 제한 시간</span><b id="secLabel" style="color:#c02b2b">${S.setupTimerSeconds}초</b></div>
+          <div class="rangeWrap"><input type="range" min="20" max="120" step="5" value="${S.setupTimerSeconds}" oninput="S.setupTimerSeconds=parseInt(this.value,10);document.getElementById('secLabel').innerText=this.value+'초'"></div>` : ''}
+      </div>
+      <div class="modalFooter"><button class="primary" style="flex:1" onclick="S.showSetupModal=false;render()">적용</button></div>
+    </div>
+  </div>`;
+}
+
+function setupPage(){
+  let isExam = S.setupMode === "exam";
+  let c = setupCandidates();
+  let n = c.list.length, cnt = currentCount(n);
+  let picked = isExam ? S.sel.exams.length : S.sel.leaves.length;
+  return topBar(`${typeLabel(S.setupType)} · ${isExam?'회차별':'단원별'}`, "home")+`
+  <section class="section">
+    <div style="margin:6px 0 8px"><b style="font-size:17px">${isExam ? "회차 선택" : "단원 선택"} <small class="meta">(여러 개 선택 가능 · 다시 누르면 해제)</small></b></div>
+    ${isExam ? renderExamPicker("setup", S.setupType) : renderUnitPicker("setup", S.setupType)}
+    <div class="notice ${c.all.length?'good':''}" style="margin-top:6px">선택 ${picked}개 · 문제 <b>${c.all.length}</b>개</div>
+  </section>
+
+  ${c.all.length ? `
+  <section class="section">
+    ${roundCard(c.all)}
+    <div class="card setSummary">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <b>풀이 설정</b>
+        <button class="badge btn" onclick="S.showSetupModal=true;render()">설정 변경</button>
+      </div>
+      <div class="sumRow"><span>학습 방식</span><b>${S.learnMode==='resume' ? `이어 풀기${c.start>0?` (${c.start+1}번째부터)`:''}` : '처음부터'}</b></div>
+      <div class="sumRow"><span>1회 풀이 문제량</span><b>${cnt}문제 <small class="meta">/ 최대 ${n}</small></b></div>
+      <div class="sumRow"><span>문제당 제한 시간</span><b>${timerLabel(S.setupTimerEnabled, S.setupTimerSeconds)}</b></div>
+      <div class="meta" style="margin-top:6px">문제는 ${isExam?'회차·번호':'목차'} 순서대로 출제됩니다.</div>
+    </div>
+    <button class="primary full" style="padding:16px;font-size:16px" onclick="startCustomQuiz()">${cnt}문제 풀이 시작</button>
+  </section>` : `<section class="section"><div class="empty" style="padding:30px 10px">위에서 ${isExam?'회차':'단원'}를 하나 이상 선택하세요.</div></section>`}
+  ${S.showSetupModal && c.all.length ? setupSettingsModal() : ''}`;
+}
+
+function startCustomQuiz(){
+  S.setupOrder = "sequential";
+  S.showSetupModal = false;
+  let c = setupCandidates();
+  if(!c.list.length){ alert("선택한 범위에 문제가 없습니다."); return; }
+  let queue = c.list.slice(0, currentCount(c.list.length));
+  saveLastSession();
+  S.group="민사법"; S.subject="상법";
+  S.queue=queue; S.qi=0; S.selected=[]; S.submitted=false; S.retryPrompt=false; S.retrying=false;
+  S.quizLabel = scopeLabel(); S.quizBack = "setupPage"; S.returnQuiz = null;
+  S.screen="quizPage";
+  render();
+  startTimerIfNeeded();
+}
+
+// ---------- 테스트: 항상 랜덤 ----------
+function testSetupPage(){
+  let cnt = testList().length;
+  let steps = countSteps(cnt);
+  let want = S.testLimit || 20, val = steps.length ? steps.reduce((b,v)=>v<=want?v:b, steps[0]) : 0;
+  if(want >= cnt) val = cnt;
+  S.testLimit = val || S.testLimit;
+  let idx = Math.max(0, steps.indexOf(val));
+  return topBar("실전 테스트 설정", "home") + `
+    <section class="title">
+      <h1>실전 테스트</h1>
+      <p>선택한 범위에서 무작위로 출제됩니다. 정답·해설 없이 끝까지 푼 뒤 한꺼번에 채점합니다.</p>
+    </section>
+    <section class="section">
+      <b>1. 문제 유형</b>
+      <div class="segmentedControl">
+        <button class="${S.testType==='ox'?'active':''}" onclick="S.testType='ox';S.testSel=newSel();render()">OX형</button>
+        <button class="${S.testType==='mcq'?'active':''}" onclick="S.testType='mcq';S.testSel=newSel();render()">5지선다형</button>
+      </div>
+      <div style="margin-top:20px"><b>2. 출제 범위</b> <small class="meta">(여러 개 선택 가능 · 다시 누르면 해제)</small></div>
+      <div class="segmentedControl">
+        <button class="${S.testScope==='all'?'active':''}" onclick="S.testScope='all';render()">전체</button>
+        <button class="${S.testScope==='exam'?'active':''}" onclick="S.testScope='exam';render()">회차별</button>
+        <button class="${S.testScope==='unit'?'active':''}" onclick="S.testScope='unit';render()">단원별</button>
+      </div>
+      <div style="margin-top:12px">
+        ${S.testScope==='exam' ? renderExamPicker('test', S.testType) : ''}
+        ${S.testScope==='unit' ? renderUnitPicker('test', S.testType) : ''}
+      </div>
+      <div class="notice ${cnt?'good':''}" style="margin-top:6px">선택한 범위의 문제: <b>${cnt}</b>개</div>
+      ${cnt ? `
+      <div style="margin-top:22px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <b>3. 문제 수</b><b id="tcLabel" style="color:#173d2a;font-size:18px">${val}문제</b>
+        </div>
+        <div class="rangeWrap">
+          <input type="range" min="0" max="${Math.max(0,steps.length-1)}" step="1" value="${idx}" ${steps.length<=1?'disabled':''}
+            oninput="S.testLimit=countSteps(${cnt})[parseInt(this.value,10)];document.getElementById('tcLabel').innerText=S.testLimit+'문제';document.getElementById('tcBtn').innerText='테스트 시작 ('+S.testLimit+'문제 / '+S.testMinutes+'분)'">
+          <div style="display:flex;justify-content:space-between" class="meta"><span>${steps[0]}</span><span>최대 ${cnt}문제</span></div>
+        </div>
+      </div>
+      <div style="margin-top:16px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <b>4. 시험 제한 시간 (5분 단위)</b><b id="tmLabel" style="color:#c02b2b;font-size:18px">${S.testMinutes}분</b>
+        </div>
+        <div class="rangeWrap">
+          <input type="range" min="5" max="120" step="5" value="${S.testMinutes}" oninput="S.testMinutes=parseInt(this.value,10);document.getElementById('tmLabel').innerText=this.value+'분';document.getElementById('tcBtn').innerText='테스트 시작 ('+S.testLimit+'문제 / '+S.testMinutes+'분)'">
+        </div>
+      </div>
+      <button id="tcBtn" class="primary full" style="padding:16px;font-size:16px;margin-top:24px" onclick="startTestExam()">테스트 시작 (${val}문제 / ${S.testMinutes}분)</button>
+      ` : `<div class="empty" style="padding:30px 10px">출제 범위를 선택하세요.</div>`}
+    </section>
+    ${bottom()}`;
+}
+function startTestExam(){
+  let list = testList();
+  if(!list.length){ alert("선택하신 조건에 해당하는 문제가 없습니다."); return; }
+  let ordered = shuffleArray(list);
+  S.testQueue = ordered.slice(0, Math.min(S.testLimit || list.length, ordered.length));
+  S.testQi = 0; S.testAnswers = {}; S.testTimeSpent = {};
+  S.testTimeLeft = S.testMinutes * 60;
+  S.testCurrentEnterTime = Date.now();
+  S.testResultData = null;
+  S.screen = "testPlayPage";
+  render();
+  startTestTimer();
+}
+
+// ===== v5: 아이콘(SVG)·탭 =====
+const ICON = {
+  home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>',
+  test:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>',
+  bank:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/></svg>',
+  wrong:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/></svg>',
+  star:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg>',
+  gear:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>',
+  back:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
+  o:'<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="5"><circle cx="24" cy="24" r="16"/></svg>',
+  x:'<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"><path d="M12 12l24 24M36 12 12 36"/></svg>'
+};
+function topBar(t, b="home"){
+  return `<header class="top"><button class="back" aria-label="뒤로" onclick="go('${b}')" style="display:flex;align-items:center">${ICON.back.replace('<svg ','<svg width="22" height="22" ')}</button><b>${esc(t)}</b><span style="width:38px"></span></header>`;
+}
+function bottom(){
+  let tabs = [["home","home","홈"],["testSetupPage","test","테스트"],["bankPage","bank","문제은행"],["wrongPage","wrong","오답"],["bookmarkPage","star","북마크"],["settingsPage","gear","설정"]];
+  return `<nav class="bottom">${tabs.map(([sc,ic,label])=>`<button class="${S.screen===sc?'on':''}" onclick="go('${sc}')" aria-label="${label}">${ICON[ic]}<small>${label}</small></button>`).join('')}</nav>`;
+}
+
+
+// 1. 화면 즉시 렌더링
+render();
+
+// 2. 서버 데이터 비동기 로드
+fetchBootstrap();
+</script>
+</body>
+</html>
